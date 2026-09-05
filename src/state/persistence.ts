@@ -1,7 +1,23 @@
 import { createEmptyProfile } from '../types/profile'
 import type { Profile } from '../types/profile'
 
-const PROFILE_KEY = 'valpro.profile.v1'
+const PROFILE_KEY = 'valpro.profile.v2'
+
+/** Keys previous builds wrote that are no longer read. Bumping PROFILE_KEY's
+ * version (rather than reusing v1) means old data left over on any visitor's
+ * device — including from the screen-resume bug — is simply never looked at
+ * again; this list actively removes it too, so it doesn't just sit there.
+ * `removeItem` on an already-absent key is a harmless no-op, so this runs
+ * unconditionally rather than needing a "have I done this already" guard. */
+const LEGACY_KEYS = ['valpro.profile.v1', 'valpro.screen.v1']
+
+function cleanupLegacyKeys(): void {
+  try {
+    LEGACY_KEYS.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    // ignore — storage unavailable
+  }
+}
 
 /**
  * Only the profile is persisted — never the current screen. The app always
@@ -28,6 +44,7 @@ export function saveProfile(profile: Profile): void {
  * style read of a field that silently isn't there any more.
  */
 export function loadProfile(): Profile | null {
+  cleanupLegacyKeys()
   try {
     const raw = localStorage.getItem(PROFILE_KEY)
     if (!raw) return null
@@ -52,6 +69,7 @@ export function loadProfile(): Profile | null {
 export function clearPersistedState(): void {
   try {
     localStorage.removeItem(PROFILE_KEY)
+    LEGACY_KEYS.forEach((key) => localStorage.removeItem(key))
   } catch {
     // ignore
   }
