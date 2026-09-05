@@ -78,14 +78,14 @@ export function Welcome() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="relative w-full bg-[var(--color-bg,#0e1116)] text-[var(--color-text,#f3f1ea)]">
+    <div className="theme-dark relative w-full bg-[var(--color-bg)] text-[var(--color-text)]">
       {/* ============ MOBILE / TABLET-PORTRAIT (<lg): full-bleed backdrop card ============ */}
       <div className="lg:hidden">
         <Backdrop
           image={backdropFor('welcome')}
           variant="hero"
-          objectPositionClassName="object-[center_30%]"
-          blurClassName="scale-110 blur-md"
+          objectPositionClassName="object-[center_28%]"
+          maskedBlur={{ px: 22, fadeStartPercent: 62, fadeEndPercent: 78 }}
           className="min-h-[100dvh]"
         >
           <div className="flex h-full min-h-full flex-col px-5 pb-5 pt-5">
@@ -256,17 +256,22 @@ export function Welcome() {
                 destroys a portrait photo's detail (forces an extreme crop/zoom). This
                 reads as a deliberate framed photograph, not a rescued full-bleed image. */}
             <div className="relative hidden h-[560px] w-[40%] shrink-0 self-stretch overflow-hidden rounded-[10px] border border-[var(--color-line)] md:block">
+              <img src={backdropFor('welcome')} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-[center_30%]" />
               <img
                 src={backdropFor('welcome')}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 h-full w-full scale-110 object-cover object-[center_32%] blur-md"
+                className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
+                style={{
+                  filter: 'blur(22px)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 78%)',
+                  maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 78%)',
+                }}
               />
               <div
                 className="absolute inset-0"
                 style={{
-                  background:
-                    'linear-gradient(180deg, rgba(8,11,15,.9) 0%, rgba(8,11,15,.8) 32%, rgba(8,11,15,.62) 58%, rgba(8,11,15,.45) 75%, rgba(8,11,15,.78) 100%)',
+                  background: 'linear-gradient(180deg, rgba(8,11,15,.55) 0%, rgba(8,11,15,.2) 30%, rgba(8,11,15,.14) 55%, rgba(8,11,15,.5) 100%)',
                 }}
               />
               <div className="absolute right-5 top-5 max-w-[65%] border-l border-white/25 pl-3 text-right text-[10px] font-medium uppercase leading-[1.8] tracking-[0.12em] text-white/85">

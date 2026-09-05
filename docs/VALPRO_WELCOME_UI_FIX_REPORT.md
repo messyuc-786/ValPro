@@ -184,6 +184,58 @@ scroll at any tested width, no clipped content.
    Root Cause). A version of the source photograph without baked text would
    remove the need for this entirely.
 
+## Addendum — visual richness fix + a second real bug found during it
+
+After the initial fix above, the user asked for the photo treatment to match
+the approved reference more closely — crisp, richly visible photography
+(mug, books, newspaper) rather than uniformly blurred.
+
+**Second real bug found via computed-style inspection (not visual
+inspection alone):** the desktop (`lg+`) layout block was missing the
+`theme-dark` class entirely. `--color-*` custom properties are defined only
+inside `.theme-dark`/`.theme-light` in `src/index.css`, not on `:root`.
+Screenshots (scaled down for the report) happened to look plausible, but
+`getComputedStyle()` on the live CTA button showed
+`background-color: rgba(0, 0, 0, 0)` — fully transparent, not blue — and
+every other token-driven color in that block (accents, borders, muted text)
+was silently falling back to inherited/initial values instead of the
+intended palette. Fixed by moving `theme-dark` onto Welcome's single
+outermost wrapper, covering both the mobile and desktop blocks. Caught
+**before** this reached the user only because a computed-style check was run
+in response to being asked to match a reference image pixel-for-pixel — a
+reminder that a scaled-down screenshot is not sufficient visual QA for color
+correctness.
+
+**Visual richness fix:** the backdrop photo's baked-in mockup text (headline,
+button, "Why ValPro Exists" link) is real pixel content in the source JPEG,
+not something a screen crop can avoid — on both the mobile card and the
+desktop panel, very close to the entire image height ends up in frame. A
+uniform blur across the whole image (the prior approach) hid that baked text
+but also fogged the real, legitimate photography below it (mug, books,
+newspaper) that has nothing to hide.
+
+Replaced the single blurred `<img>` with two stacked copies of the same
+image: a sharp base layer, and a blurred layer whose visibility is
+controlled by a CSS `mask-image` gradient (`Backdrop`'s new `maskedBlur`
+prop: `{ px, fadeStartPercent, fadeEndPercent }`). The blurred layer is
+fully opaque through the zone containing the baked text and fades to fully
+transparent below it, revealing the sharp layer — so the newspaper/mug/book
+photography reads crisp and rich, matching the reference, while the fake
+text stays fully obscured.
+
+Tuning required two iterations per surface (mobile card and desktop panel
+use different crops of the same source image, so their baked-text zones
+land at different percentages) — verified by screenshot after each change
+that the ghosting was actually gone, not just that the blur "looked
+stronger." Final values: mobile `{ px: 22, fadeStart: 62%, fadeEnd: 78% }`;
+desktop panel `{ px: 22, fadeStart: 62%, fadeEnd: 78% }` (same photo, close
+enough crops that the same tuning holds for both).
+
+Re-verified after both fixes: 35/35 tests, clean build, no ghosting at
+320/375/1440/1920px, CTA button computed background color confirmed correct
+(`rgb(91, 147, 214)`) at desktop width via `getComputedStyle`, not just by
+eye.
+
 ## Next Recommended Phase
 
 WAIT FOR USER.
