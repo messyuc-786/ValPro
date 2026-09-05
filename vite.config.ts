@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  base: '/ValPro/',  plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',
     globals: true,
