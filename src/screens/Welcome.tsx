@@ -34,7 +34,9 @@ function NavMenuButton({ open, onClick }: { open: boolean; onClick: () => void }
       onClick={onClick}
       aria-label={open ? 'Close menu' : 'Open menu'}
       aria-expanded={open}
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-line-strong)] text-[var(--color-text)]"
+      // 44px — the minimum comfortable touch target (iOS HIG / Material both
+      // land here); the earlier 36px was sized for a mouse cursor, not a thumb.
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--color-line-strong)] text-[var(--color-text)]"
     >
       {open ? <IconClose className="h-4 w-4" /> : <IconMenu className="h-4 w-4" />}
     </button>
@@ -76,7 +78,7 @@ export function Welcome() {
       {/* ============ MOBILE / TABLET-PORTRAIT (<lg): full-bleed backdrop card ============ */}
       <div className="lg:hidden">
         <Backdrop image={backdropFor('welcome')} variant="hero" objectPositionClassName="object-[center_28%]" className="min-h-[100dvh]">
-          <div className="flex h-full min-h-full flex-col px-5 pb-5 pt-5">
+          <div className="flex h-full min-h-full flex-col px-5 pb-[calc(1.25rem_+_env(safe-area-inset-bottom))] pt-[calc(1.25rem_+_env(safe-area-inset-top))]">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <Wordmark markClassName="h-5 w-5" />

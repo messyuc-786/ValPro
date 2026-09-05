@@ -373,6 +373,91 @@ round. **PASS** — `npm run build`, zero TypeScript errors. **PASS** —
    clean region. A full-height hero would reintroduce the zoom problem from
    Addendum 1's Root Cause section.
 
+## Addendum 3 — app-shell mobile compatibility pass (iPhone + Android)
+
+The user's next request was broader than Welcome: "MOBILE COMPATIBLE ui, IPHONE, ANDROID BOTH, ITS NOT A WEBSITE ... FIX ui SIZE, SPACING ISSUES." This addendum covers a real-device fitness pass across the whole app (every screen, not just Welcome), since the complaint was about the app shell reading like a website on a phone, not about Welcome specifically.
+
+### Root causes found
+
+1. **`index.html`'s viewport meta lacked `viewport-fit=cover`.** Without it,
+   `env(safe-area-inset-*)` always resolves to `0px` even on a notched
+   device, so there was no way for any layout to react to a real iPhone's
+   notch/Dynamic Island or home-indicator gesture bar even if it tried to.
+2. **No screen used `env(safe-area-inset-*)` at all.** Every header/footer
+   used a fixed padding value (`pt-6`, `pb-3`, etc.) that works fine in a
+   plain browser window but leaves content sitting right against — or, on
+   some devices, at risk of sliding under — the status bar/notch at the top
+   and the home-indicator/gesture-nav bar at the bottom. This is one of the
+   clearest "this is a website, not an app" tells on a real phone.
+3. **Form inputs/selects were `text-[15px]`.** iOS Safari auto-zooms the
+   entire page on focus for any input rendered under 16px — a jarring zoom
+   that never happens in a native app and is a very recognizable "website"
+   bug on iPhone specifically.
+4. **Two touch targets were under the 44×44px minimum** (iOS HIG / Material
+   both land near there): Welcome's hamburger button (36×36px) and
+   CreatorStory's back button (40×40px).
+5. **No `overscroll-behavior`.** The whole page could rubber-band/bounce on
+   iOS Safari at scroll boundaries and trigger pull-to-refresh — another
+   distinctly browser-chrome behavior a native-feeling screen doesn't have.
+6. **No `touch-action: manipulation`** on interactive elements, leaving the
+   ~300ms tap-response delay / double-tap-to-zoom gesture active on buttons.
+
+### Changes
+
+- `index.html` — added `viewport-fit=cover` to the viewport meta.
+- `src/index.css` — added `overscroll-behavior-y: none` on `body` (stops
+  page-level bounce/pull-to-refresh) with `overscroll-behavior-y: contain`
+  on internally-scrolling containers (`.overflow-y-auto`, so their own
+  momentum scroll still works without leaking the bounce to the page); added
+  `touch-action: manipulation` to `button`, `a`, `[role=button]`,
+  `[role=switch]`.
+- `src/ui/fields.tsx` — `TextField`/`SelectField` font size `15px` → `16px`
+  (fixes the iOS auto-zoom-on-focus bug); `ToggleRow`'s switch keeps its
+  compact 44×24 visual pill but gained an invisible `::before` hit-area
+  extending it to a full 44px square.
+- `src/ui/ScreenShell.tsx` (used by 9 of the 15 onboarding/result screens) —
+  brand-bar top padding and footer bottom padding both changed from fixed
+  values to `calc(<base> + env(safe-area-inset-*))`, so real devices get the
+  extra inset on top of the existing spacing (non-notched devices see no
+  change at all, since `env()` resolves to `0px` there).
+- Applied the same `calc(<base> + env(safe-area-inset-*))` treatment to the
+  five screens that build their own header/footer chrome instead of using
+  `ScreenShell`: `CreatorStory.tsx`, `ShareResult.tsx`, `ResultOverview.tsx`,
+  `WhyThisValue.tsx`, `ImprovementAreas.tsx`, `WhatIfSimulator.tsx`, and
+  `Welcome.tsx`'s own mobile card.
+- `CreatorStory.tsx`'s back button: 40×40px → 48×48px, matching every other
+  screen's back button.
+- `Welcome.tsx`'s `NavMenuButton`: 36×36px → 44×44px.
+
+### Verification
+
+- **Tests:** PASS — 35/35, no assertion changes needed.
+- **Build:** PASS — zero TypeScript errors.
+- **Lint:** PASS — only the two pre-existing, unrelated `AppContext.tsx`
+  warnings.
+- **Computed-style checks** (not just visual): confirmed live in-browser
+  that the Welcome hamburger button measures exactly 44×44px
+  (`getBoundingClientRect()`), that a `<select>` on the Education screen
+  computes `font-size: 16px`, and that the new `calc()` padding expressions
+  evaluate correctly (24px/12px on a non-notched browser — the base values,
+  confirming `env()` degrades to `0px` safely rather than breaking the
+  `calc()`).
+- **Full flow re-walked** at 320×700 and 375×812: Welcome → Role → Domain →
+  Education, confirming no regression in the actual onboarding flow from
+  the padding/sizing changes, and no horizontal overflow at either width
+  (`scrollWidth === clientWidth` at both).
+- **Not independently verifiable from this environment:** the actual
+  bounce/rubber-band suppression, the tap-delay removal, and the real
+  safe-area inset values can only be fully confirmed on an actual iPhone/
+  Android device or a simulator with real notch geometry — this session's
+  browser tooling has no notched viewport to test against and cannot
+  simulate `overscroll-behavior`'s scroll-physics effect. The CSS is
+  standard, widely-supported (`env()` since iOS 11, `overscroll-behavior`
+  since iOS 16 / all modern Android browsers, `touch-action` universally),
+  and degrades to a no-op harmlessly where unsupported — but a real-device
+  check by the user is the honest final confirmation this addendum can't
+  self-certify.
+
 ## Next Recommended Phase
 
 WAIT FOR USER.

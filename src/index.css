@@ -58,10 +58,29 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  /* Stops the whole page rubber-banding/pull-to-refresh on iOS Safari — that
+     bounce is one of the clearest "this is a webpage" tells on a phone; a
+     native-feeling screen doesn't do it. Elements that scroll internally
+     (onboarding content, the Welcome card) opt back in per-element below. */
+  overscroll-behavior-y: none;
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Removes the ~300ms tap delay and the double-tap-to-zoom gesture on
+   interactive elements — without this, every button press on a touch
+   device has a small, perceptible lag that reads as "website", not "app". */
+button,
+a,
+[role='button'],
+[role='switch'] {
+  touch-action: manipulation;
+}
+
+.overflow-y-auto {
+  overscroll-behavior-y: contain;
 }
 
 h1,

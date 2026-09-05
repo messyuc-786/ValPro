@@ -14,14 +14,14 @@ export function CreatorStory() {
 
   return (
     <Backdrop image={backdropFor('creators')}>
-      <div className="flex h-full min-h-full flex-col px-6 pt-6 pb-6">
+      <div className="flex h-full min-h-full flex-col px-6 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(1.5rem_+_env(safe-area-inset-top))]">
         <div className="flex items-center justify-between">
           <Wordmark />
           <button
             type="button"
             onClick={goBack}
             aria-label="Go back"
-            className="flex h-10 w-10 items-center justify-center rounded-[3px] border border-[var(--color-line-strong)]"
+            className="flex h-12 w-12 items-center justify-center rounded-[3px] border border-[var(--color-line-strong)]"
           >
             <IconChevronLeft className="h-5 w-5" />
           </button>

@@ -12,7 +12,7 @@ export function ImprovementAreas() {
 
   return (
     <Backdrop image={backdropFor('gaps')}>
-      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4">
+      <div className="flex-1 overflow-y-auto px-6 pb-4 pt-[calc(1.5rem_+_env(safe-area-inset-top))]">
         <Wordmark />
         <h1 className="mt-6 font-display text-[26px] font-medium leading-snug">Your Value Gaps</h1>
         <p className="mt-1 text-[14px] text-[var(--color-muted)]">Focus on these areas to increase your market value.</p>
@@ -32,7 +32,7 @@ export function ImprovementAreas() {
         </p>
       </div>
 
-      <div className="shrink-0 border-t border-[var(--color-line)] px-6 pt-4 pb-3">
+      <div className="shrink-0 border-t border-[var(--color-line)] px-6 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] pt-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
