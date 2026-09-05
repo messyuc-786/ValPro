@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-script: "Caveat", cursive;
+}
+
+/*
+ * ValPro v2 visual system: one cinematic editorial world across every screen
+ * (see the ValPro UI Final Package / 03_BRAND/DESIGN_SYSTEM.md) — deep
+ * graphite, soft ivory type, steel blue as the one recognizable active
+ * accent, warm taupe/champagne reserved for secondary "explore" links.
+ * Every screen sits on its own photographic backdrop (see BackdropShell)
+ * under a dark scrim, rather than switching between a light and dark mode.
+ * `.theme-light` is kept only for the rare flat (non-backdrop) surface.
+ */
+.theme-light {
+  --color-bg: #f4f0e7;
+  --color-surface: #faf9f5;
+  --color-surface-alt: #e9e4d8;
+  --color-text: #111111;
+  --color-muted: #77736b;
+  --color-accent: #b58a3a;
+  --color-accent-blue: #4f8bd1;
+  --color-line: rgba(17, 17, 17, 0.12);
+  --color-line-strong: rgba(17, 17, 17, 0.28);
+  --color-positive: #2f7d5b;
+  --color-negative: #b84c3e;
+}
+
+.theme-dark {
+  --color-bg: #0e1116;
+  /* Semi-transparent, not flat: every card/input sits as a glass panel over
+     the screen's photographic backdrop instead of masking it with a solid box. */
+  --color-surface: rgba(14, 17, 22, 0.58);
+  --color-surface-alt: rgba(14, 17, 22, 0.72);
+  --color-text: #f3f1ea;
+  --color-muted: #99a1ad;
+  --color-accent: #c9a877;
+  --color-accent-blue: #5b93d6;
+  --color-line: rgba(243, 241, 234, 0.14);
+  --color-line-strong: rgba(243, 241, 234, 0.28);
+  --color-positive: #5cba8f;
+  --color-negative: #d97a68;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #0b0b0a;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-blue, #4f8bd1);
+  outline-offset: 2px;
+}
+
+/* Scrollbar restraint — thin, not themed with gradients */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong, rgba(0, 0, 0, 0.2));
+  border-radius: 99px;
+}
