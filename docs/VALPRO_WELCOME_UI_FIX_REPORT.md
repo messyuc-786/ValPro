@@ -236,6 +236,143 @@ Re-verified after both fixes: 35/35 tests, clean build, no ghosting at
 (`rgb(91, 147, 214)`) at desktop width via `getComputedStyle`, not just by
 eye.
 
+## Addendum 2 — full-bleed hero rebuild, fake stats removed (STOP directive)
+
+The user rejected the bounded-photo-panel compromise from Addendum 1 outright:
+"LEFT = text / RIGHT = small separate image card... That is NOT what I
+requested." This addendum documents the actual rebuild to a genuine
+full-bleed hero, and the fake-stats removal, done under that explicit
+correction.
+
+### Root cause of "text left / small image card right"
+
+That structure was a deliberate compromise I made in Addendum 1 to solve a
+real technical problem (a portrait 900×1400 source photo, stretched via
+`object-cover` across a full-viewport-wide landscape container, forces such
+extreme zoom that the source image's baked-in mockup text becomes large and
+legible again). The compromise traded away "photo is the whole hero" to
+avoid that. The user correctly rejected the trade — the reference composition
+requires the photo to actually BE the hero, not sit beside it.
+
+### Fix: full-bleed hero band, not a side panel
+
+Rebuilt the desktop (`lg+`) layout in `src/screens/Welcome.tsx`:
+
+- Removed the two-column "text column + bounded photo panel" structure
+  entirely.
+- The photograph is now a genuine full-bleed section (`Backdrop` component,
+  same one used everywhere else in the app) spanning the full page width,
+  with nav, eyebrow signals, headline, CTA and "Why ValPro Exists" overlaid
+  directly on top of it — matching the reference composition exactly (text
+  on the photo, not beside it).
+- The zoom problem is solved differently this time: instead of shrinking the
+  photo into a panel, the hero **band's height** is capped well below the
+  viewport height (`h-[min(46vw,640px)] min-h-[520px]` — a wide, short strip,
+  not a full-screen photo) and the crop is bottom-anchored
+  (`object-[center_100%]`). A short, wide band showing the *bottom* of a
+  portrait photo needs much less zoom than a tall, full-viewport band would,
+  which keeps the crop within (or very close to) the source image's genuinely
+  clean bottom region — verified clean at 1024, 1280, 1366, 1440, and 1920px
+  (see Responsive Behaviour below).
+- Stats and footer moved into a distinct solid-color "supporting information"
+  section below the hero band (a thin top border separates them) — this
+  matches the reference's structure (photographic hero, then a
+  distinct informational band below) and also means that section carries none
+  of the baked-text risk at all, since it isn't photo-backed.
+
+### Fix: removed blur everywhere per explicit "DO NOT BLUR THE HERO" directive
+
+`src/ui/Backdrop.tsx`'s `maskedBlur` mechanism (Addendum 1's blur+mask
+approach) was removed entirely. The `Backdrop` component now renders exactly
+one, unblurred `<img>` per screen; only the scrim (a CSS gradient overlay,
+no filter) does any legibility/text-hiding work. This was tested and
+tuned in two rounds:
+
+1. First pass used the same darkness levels as before (~0.9 peak opacity)
+   without blur. Screenshotted and found still visibly ghosting the baked
+   headline/button/"Why ValPro Exists" text on mobile — a 0.97-opacity dark
+   overlay still let bright baked text show through faintly.
+2. Diagnostic: set the top of the scrim to fully opaque (`rgba(4,5,7,1)`,
+   opacity 1, not 0.97) and reshot — ghosting disappeared completely,
+   confirming the mechanism works and the earlier value simply wasn't dark
+   enough, not a layering/z-index bug.
+
+Given mobile's card aspect ratio shows nearly the *entire* image height (no
+meaningful zoom available there to crop the text out of frame the way the
+desktop band does), and a solid-opacity overlay was the only tested value
+that fully erased the baked text without blur, the final mobile treatment is:
+a solid near-black ground under nav/headline/CTA (down to ~72% of the card),
+with the real photograph revealed at full, unblurred sharpness from
+"Why ValPro Exists" down through the stats/footer — documented honestly as a
+trade-off below, not hidden.
+
+### Fake claims removed
+
+Removed entirely, everywhere on Welcome:
+
+- "4+ Career Domains"
+- "1M+ Professionals (Community Goal)"
+- "95% Found it useful (Early Users)"
+- "Better Career Decisions" (as a bare unsupported label)
+
+Replaced with four truthful product descriptors — statements about what the
+product does, not measured/marketed claims:
+
+- "Multiple Career Paths"
+- "Profile-Based Valuation"
+- "Market-Aware Insights"
+- "Built for Better Decisions"
+
+No numbers, percentages, user counts, or "community goal"/"early users"
+qualifiers appear anywhere on the screen now. `StatsPanel` (the old
+number-and-qualifier component) was deleted from `Welcome.tsx` and replaced
+with `ValuePointsRow` (icon + label only).
+
+### Responsive re-verification (production build via `vite preview`)
+
+| Width | Result |
+|---|---|
+| 390×844 | No overflow. Solid dark ground through nav/headline/CTA, photo crisp and unblurred from "Why ValPro Exists" down. No ghosting. |
+| 430×932 | Same as above, no overflow, no clipping. |
+| 1024×768 | Full-bleed hero band, crisp unblurred photo (newspaper/mug fully legible), no ghosting — narrowest desktop width, most zoomed band, checked specifically for residual baked-text bleed and found none. |
+| 1280×720 | Full-bleed, clean. |
+| 1366×768 | Full-bleed, clean. |
+| 1440×900 | Full-bleed, clean, matches the approved reference composition closely. |
+| 1920×1080 | Full-bleed, clean, no horizontal scroll (`scrollWidth === clientWidth === 1920`). |
+
+768×1024 (tablet-portrait) and 393×852/412×915 were not re-shot individually
+in this pass but fall on the same `<lg` mobile layout verified above (no
+structural difference between the checked neighboring widths).
+
+### Tests / Build
+
+**PASS** — 35/35 (`npm run test`), zero change to assertions needed this
+round. **PASS** — `npm run build`, zero TypeScript errors. **PASS** —
+`npm run lint`, only the two pre-existing unrelated warnings in
+`AppContext.tsx` (not touched by this work). CTA navigation re-verified live
+(`Discover Your Market Value` → Role screen).
+
+### Known Limitations (supersedes Addendum 1's panel-specific ones)
+
+1. **On mobile/tablet-portrait, the photograph is not visible behind the
+   headline/CTA** — it's revealed lower in the card, from "Why ValPro Exists"
+   down. This is a direct, tested consequence of "no blur" plus "the source
+   image's baked text must be fully hidden" plus "mobile's aspect ratio can't
+   crop the text out of frame the way the desktop band does" — all three
+   were non-negotiable in this pass, and satisfying all three simultaneously
+   on mobile is not possible with unmodified opacity/crop tricks alone (only
+   a fully solid overlay reliably erased the baked text in testing). The
+   desktop hero band does not have this limitation — the photo is visible
+   behind the entire headline/CTA area there. Removing this limitation on
+   mobile too would need a version of the source photograph without the
+   baked-in mockup text.
+2. **The desktop hero band's height is capped** (`min(46vw, 640px)`,
+   `min-h-[520px]`) rather than filling the full viewport height. This is
+   intentional, for the same zoom/crop reason as above — the shorter, wider
+   band is what makes the bottom-anchored crop land in the source photo's
+   clean region. A full-height hero would reintroduce the zoom problem from
+   Addendum 1's Root Cause section.
+
 ## Next Recommended Phase
 
 WAIT FOR USER.
