@@ -1,16 +1,15 @@
 import type { ReactNode } from 'react'
 
 const SCRIMS = {
-  /** Welcome only — the source photograph has a baked-in mockup headline and
-   * button in its upper half; the top of this gradient stays strong enough
-   * (with a blur on the image) to fully wash that out, while the middle/lower
-   * photo — real desk props, not fake UI — is left visible rather than
-   * fogged over. Kept strong enough in the middle band too, because on a
-   * wide desktop viewport `object-cover` zooms much further into this
-   * portrait source image than it does on mobile — the same fake text that
-   * was a faint background wash at phone width becomes large and legible if
-   * the scrim isn't dark enough to survive that zoom. */
-  hero: 'radial-gradient(120% 100% at 18% 38%, transparent 0%, transparent 42%, rgba(9,12,16,.75) 78%, rgba(14,17,22,.97) 100%), linear-gradient(180deg, rgba(8,11,15,.95) 0%, rgba(8,11,15,.78) 40%, rgba(8,11,15,.68) 65%, rgba(8,11,15,.85) 100%)',
+  /** Welcome only — the source photograph has a baked-in mockup headline,
+   * button, and a second "Why ValPro Exists" link in its upper half. On this
+   * card's aspect ratio `object-cover` shows almost the full image height
+   * (unlike a wide desktop crop), so that fake text is always in frame —
+   * this scrim (with a blur on the image) has to stay strong enough through
+   * the top ~60% to fully wash it out, or it visibly doubles with our real
+   * text. The bottom band stays lighter so the desk props (real photography,
+   * not fake UI) still read with some warmth behind the stats panel. */
+  hero: 'linear-gradient(180deg, rgba(8,11,15,.94) 0%, rgba(8,11,15,.86) 35%, rgba(8,11,15,.7) 60%, rgba(8,11,15,.5) 78%, rgba(8,11,15,.82) 100%)',
   /** Every other screen — the photography there is decorative props (book
    * spines, a notebook, a laptop), not fake UI, so a lighter scrim is enough
    * for text contrast while the art direction stays clearly visible. */

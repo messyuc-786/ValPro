@@ -44,20 +44,16 @@ function CurrentScreen() {
 }
 
 /**
- * Every screen renders inside one phone-shaped canvas — edge-to-edge on a
- * real phone, centered as a device frame on wider viewports — EXCEPT Welcome,
- * which is the landing/marketing surface and gets a real wide desktop layout
- * (see Welcome.tsx's own lg: breakpoint). The 15-screen assessment flow stays
- * a deliberate mobile product at every width; the landing page doesn't need
- * to pretend to be a phone once there's room not to.
+ * Every screen — Welcome included — renders inside one phone-shaped canvas:
+ * edge-to-edge on a real phone, centered as a device frame on wider
+ * viewports. Welcome briefly broke out into a full wide-desktop layout, but
+ * that stretched its single portrait backdrop photo far past the content it
+ * actually has, producing a vignetted dead zone on wide screens instead of
+ * the rich, fully-visible photography the approved reference shows — so it
+ * stays in the same card everything else uses, just with its own internal
+ * nav row and side annotation sized to fit that card.
  */
 function App() {
-  const { screen } = useApp()
-
-  if (screen === 'welcome') {
-    return <Welcome />
-  }
-
   return (
     <div className="flex min-h-[100dvh] w-full justify-center bg-[#0b0b0a] sm:items-center sm:py-8">
       <div className="relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-[var(--color-bg,#0e1116)] sm:h-[860px] sm:rounded-[28px] sm:border sm:border-black/40 sm:shadow-2xl">
