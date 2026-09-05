@@ -4,7 +4,7 @@ import { createEmptyProfile } from '../types/profile'
 import type { Profile } from '../types/profile'
 import { profileReducer } from './profileReducer'
 import type { ProfileAction } from './profileReducer'
-import { loadProfile, loadScreen, saveProfile, saveScreen, clearPersistedState } from './persistence'
+import { loadProfile, saveProfile, clearPersistedState } from './persistence'
 import { nextScreen } from '../navigation/flow'
 import type { ScreenId } from '../navigation/flow'
 import { evaluateProfile } from '../engine/valuationEngine'
@@ -26,8 +26,9 @@ const AppContext = createContext<AppContextValue | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [profile, dispatch] = useReducer(profileReducer, undefined, () => loadProfile() ?? createEmptyProfile())
-  const [screen, setScreen] = useState<ScreenId>(() => loadScreen() ?? 'welcome')
-  const [history, setHistory] = useState<ScreenId[]>(() => [loadScreen() ?? 'welcome'])
+  // The screen itself is never persisted — every visit opens at Welcome (see persistence.ts).
+  const [screen, setScreen] = useState<ScreenId>('welcome')
+  const [history, setHistory] = useState<ScreenId[]>(['welcome'])
 
   const dispatchAndPersist = useCallback((action: ProfileAction) => {
     dispatch(action)
@@ -36,14 +37,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const goTo = useCallback((target: ScreenId) => {
     setScreen(target)
     setHistory((h) => [...h, target])
-    saveScreen(target)
   }, [])
 
   const goNext = useCallback(() => {
     setScreen((current) => {
       const target = nextScreen(current)
       setHistory((h) => [...h, target])
-      saveScreen(target)
       return target
     })
   }, [])
@@ -54,7 +53,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const trimmed = h.slice(0, -1)
       const target = trimmed[trimmed.length - 1]
       setScreen(target)
-      saveScreen(target)
       return trimmed
     })
   }, [])
