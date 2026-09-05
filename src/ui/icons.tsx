@@ -194,6 +194,35 @@ export function IconMenu({ className }: IconProps) {
   )
 }
 
+export function IconUsers({ className }: IconProps) {
+  return (
+    <svg className={className} {...base}>
+      <circle cx="7.5" cy="7" r="2.5" />
+      <path d="M2.8 15.5c0-2.6 2.1-4.2 4.7-4.2s4.7 1.6 4.7 4.2" />
+      <circle cx="14" cy="7.8" r="2" />
+      <path d="M13 11.6c1.9.3 3.5 1.6 3.5 3.9" />
+    </svg>
+  )
+}
+
+export function IconBarChartUp({ className }: IconProps) {
+  return (
+    <svg className={className} {...base}>
+      <path d="M3.5 16.5v-4M8 16.5V9M12.5 16.5v-7M17 16.5V6" />
+    </svg>
+  )
+}
+
+export function IconTarget({ className }: IconProps) {
+  return (
+    <svg className={className} {...base}>
+      <circle cx="10" cy="10" r="7" />
+      <circle cx="10" cy="10" r="3.4" />
+      <circle cx="10" cy="10" r="0.6" fill="currentColor" />
+    </svg>
+  )
+}
+
 export function IconLink({ className }: IconProps) {
   return (
     <svg className={className} {...base}>
