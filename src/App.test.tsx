@@ -10,7 +10,10 @@ import App from './App'
  */
 async function fillOnboarding(user: ReturnType<typeof userEvent.setup>) {
   // Welcome -> Role
-  await user.click(screen.getByRole('button', { name: /discover your market value/i }))
+  // Welcome renders a mobile and a desktop variant simultaneously (CSS-hidden,
+  // not DOM-removed, at any one viewport) — jsdom doesn't evaluate the media
+  // query, so both are "visible" to a DOM query; the mobile one is first.
+  await user.click(screen.getAllByRole('button', { name: /discover your market value/i })[0])
 
   // Role
   await user.click(screen.getByRole('button', { name: /working professional/i }))
@@ -81,10 +84,13 @@ describe('ValPro end-to-end flow', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /discover your market value/i }))
+    // Welcome renders a mobile and a desktop variant simultaneously (CSS-hidden,
+  // not DOM-removed, at any one viewport) — jsdom doesn't evaluate the media
+  // query, so both are "visible" to a DOM query; the mobile one is first.
+  await user.click(screen.getAllByRole('button', { name: /discover your market value/i })[0])
     expect(await screen.findByText(/what best describes you/i)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /go back/i }))
-    expect(await screen.findByText(/know your/i)).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: /go back/i })[0])
+    expect((await screen.findAllByText(/know your/i))[0]).toBeInTheDocument()
   })
 })
