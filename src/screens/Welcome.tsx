@@ -3,6 +3,7 @@ import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
 import { Button } from '../ui/Button'
 import { IconArrowRight } from '../ui/icons'
+import { backdropFor } from '../navigation/flow'
 
 const EYEBROW_SIGNALS = ['Your Skills', 'Your Experience', 'Market Reality', 'Your Value']
 
@@ -17,8 +18,8 @@ export function Welcome() {
   const { goTo } = useApp()
 
   return (
-    <Backdrop image="/backdrops/welcome.jpg" variant="hero" blur objectPosition="center 30%">
-      <div className="flex h-full min-h-full flex-col px-6 pb-7 pt-6">
+    <Backdrop image={backdropFor('welcome')} variant="hero" blur objectPosition="center 22%">
+      <div className="flex h-full min-h-full flex-col justify-between px-6 pb-7 pt-6">
         <div className="flex items-start justify-between">
           <div>
             <Wordmark />
@@ -33,7 +34,7 @@ export function Welcome() {
           </div>
         </div>
 
-        <div className="mt-10 flex-1">
+        <div className="mt-6">
           <div className="flex flex-col gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
             {EYEBROW_SIGNALS.map((s) => (
               <span key={s}>{s}</span>

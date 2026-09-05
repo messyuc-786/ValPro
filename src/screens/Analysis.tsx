@@ -3,6 +3,7 @@ import { useApp } from '../state/AppContext'
 import { IconCheck, IconRing } from '../ui/icons'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
+import { backdropFor } from '../navigation/flow'
 
 const STEPS = [
   'Profile information',
@@ -41,7 +42,7 @@ export function Analysis() {
   }, [completed, prefersReducedMotion])
 
   return (
-    <Backdrop image="/backdrops/analysis.jpg">
+    <Backdrop image={backdropFor('analysis')}>
       <div className="flex h-full min-h-full flex-col justify-center px-6 pb-6">
         <Wordmark />
         <h1 className="mt-6 font-display text-[26px] font-medium leading-snug">Analyzing your profile…</h1>

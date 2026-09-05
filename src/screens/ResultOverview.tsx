@@ -4,6 +4,7 @@ import { ConfidenceBadge, StatRow, StatTile } from '../ui/resultDisplay'
 import { IconArrowRight } from '../ui/icons'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
+import { backdropFor } from '../navigation/flow'
 
 export function ResultOverview() {
   const { result, goTo } = useApp()
@@ -12,7 +13,7 @@ export function ResultOverview() {
   const today = new Date(result.asOf).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
-    <Backdrop image="/backdrops/results.jpg">
+    <Backdrop image={backdropFor('result')}>
       <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <Wordmark />

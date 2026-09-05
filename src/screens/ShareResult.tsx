@@ -4,6 +4,7 @@ import { Button } from '../ui/Button'
 import { IconDownload, IconLink, IconShare } from '../ui/icons'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
+import { backdropFor } from '../navigation/flow'
 
 function buildShareSummary(marketValue: number, score: number, topPercent: number, date: string): string {
   return [
@@ -76,7 +77,7 @@ export function ShareResult() {
   }
 
   return (
-    <Backdrop image="/backdrops/share.jpg">
+    <Backdrop image={backdropFor('share')}>
       <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4">
         <Wordmark />
         <h1 className="mt-6 font-display text-[26px] font-medium leading-snug">Share Your Result</h1>

@@ -2,6 +2,7 @@ import { useApp } from '../state/AppContext'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
 import { IconChevronLeft } from '../ui/icons'
+import { backdropFor } from '../navigation/flow'
 
 /**
  * "Why ValPro Exists" — a dedicated full-screen page (per the package's
@@ -12,7 +13,7 @@ export function CreatorStory() {
   const { goBack } = useApp()
 
   return (
-    <Backdrop image="/backdrops/creators.jpg">
+    <Backdrop image={backdropFor('creators')}>
       <div className="flex h-full min-h-full flex-col px-6 pt-6 pb-6">
         <div className="flex items-center justify-between">
           <Wordmark />

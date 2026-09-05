@@ -1,15 +1,27 @@
 /**
- * ValPro wordmark + monogram. The UI package's "logo direction" asset was mood
- * photography, not artwork to trace, so this is an original mark: a chevron
- * reading as both a rising market line and the letter V, in a thin circle so
- * it reads at favicon size and survives on both dark and light grounds.
+ * ValPro mark — a rising-bars + chevron "V", in the approved purple → blue →
+ * teal gradient, works as an app icon, a header mark, and on the share card.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="16" cy="16" r="14.5" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
-      <path d="M9.5 12.5 16 21l6.5-8.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16 21V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.85" />
+      <defs>
+        <linearGradient id="valproMarkGradient" x1="2" y1="26" x2="30" y2="4" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#7C3AED" />
+          <stop offset="0.5" stopColor="#3B82F6" />
+          <stop offset="1" stopColor="#14B8A6" />
+        </linearGradient>
+      </defs>
+      <rect x="2.5" y="19" width="3.4" height="7" rx="1" fill="url(#valproMarkGradient)" opacity="0.85" />
+      <rect x="7.4" y="15" width="3.4" height="11" rx="1" fill="url(#valproMarkGradient)" opacity="0.92" />
+      <rect x="12.3" y="10.5" width="3.4" height="15.5" rx="1" fill="url(#valproMarkGradient)" />
+      <path
+        d="M15 15.5 20.5 25 29 8.5"
+        stroke="url(#valproMarkGradient)"
+        strokeWidth="3.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -17,8 +29,24 @@ export function LogoMark({ className }: { className?: string }) {
 export function Wordmark({ className, markClassName }: { className?: string; markClassName?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className ?? ''}`}>
-      <LogoMark className={markClassName ?? 'h-5 w-5'} />
+      <LogoMark className={markClassName ?? 'h-6 w-6'} />
       <span className="font-display text-[17px] font-semibold tracking-tight">ValPro</span>
     </span>
+  )
+}
+
+/** Full lockup — mark, wordmark, and brand tagline stacked — for the Welcome
+ * hero, the share card, and any future splash context. */
+export function LogoLockup({ className }: { className?: string }) {
+  return (
+    <div className={`flex flex-col items-start gap-1.5 ${className ?? ''}`}>
+      <span className="inline-flex items-center gap-2.5">
+        <LogoMark className="h-8 w-8" />
+        <span className="font-display text-[22px] font-semibold tracking-tight">ValPro</span>
+      </span>
+      <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+        Know Your Worth. Grow Your Tomorrow.
+      </span>
+    </div>
   )
 }

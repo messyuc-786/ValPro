@@ -2,14 +2,15 @@ import type { CSSProperties, ReactNode } from 'react'
 
 const SCRIMS = {
   /** Welcome only — the source photograph has a baked-in mockup headline and
-   * button; this scrim (paired with a blur on the image itself) is tuned to
-   * fully wash that out while keeping the skyline glow and desk props as
-   * ambient texture behind our own real, responsive text. */
-  hero: 'linear-gradient(180deg, rgba(10,13,17,.93) 0%, rgba(10,13,17,.72) 38%, rgba(10,13,17,.6) 62%, rgba(10,13,17,.94) 100%)',
+   * button in its upper half; the top of this gradient stays strong enough
+   * (with a light blur on the image) to fully wash that out, while the
+   * middle/lower photo — real desk props, not fake UI — is left visible
+   * rather than fogged over. */
+  hero: 'linear-gradient(180deg, rgba(8,11,15,.94) 0%, rgba(8,11,15,.62) 40%, rgba(8,11,15,.4) 65%, rgba(8,11,15,.78) 100%)',
   /** Every other screen — the photography there is decorative props (book
-   * spines, a notebook, a laptop), not fake UI, so a lighter, even scrim is
-   * enough for text contrast without hiding the art direction. */
-  standard: 'linear-gradient(180deg, rgba(10,13,17,.88) 0%, rgba(10,13,17,.8) 45%, rgba(10,13,17,.9) 100%)',
+   * spines, a notebook, a laptop), not fake UI, so a lighter scrim is enough
+   * for text contrast while the art direction stays clearly visible. */
+  standard: 'linear-gradient(180deg, rgba(8,11,15,.74) 0%, rgba(8,11,15,.6) 45%, rgba(8,11,15,.8) 100%)',
 } as const
 
 interface BackdropProps {
@@ -32,7 +33,7 @@ export function Backdrop({ image, variant = 'standard', objectPosition = 'center
         alt=""
         aria-hidden="true"
         style={imgStyle}
-        className={`absolute inset-0 h-full w-full object-cover ${blur ? 'scale-110 blur-md' : ''}`}
+        className={`absolute inset-0 h-full w-full object-cover ${blur ? 'scale-105 blur-sm' : ''}`}
       />
       <div className="absolute inset-0" style={{ background: SCRIMS[variant] }} />
       <div className="relative z-10 flex h-full min-h-full flex-col">{children}</div>

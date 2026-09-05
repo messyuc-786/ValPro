@@ -4,13 +4,14 @@ import { SignalRow } from '../ui/resultDisplay'
 import { IconChevronLeft } from '../ui/icons'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
+import { backdropFor } from '../navigation/flow'
 
 export function WhyThisValue() {
   const { result, goTo, goBack } = useApp()
   if (!result) return null
 
   return (
-    <Backdrop image="/backdrops/insights.jpg">
+    <Backdrop image={backdropFor('why')}>
       <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4">
         <Wordmark />
         <h1 className="mt-6 font-display text-[26px] font-medium leading-snug">Why this value?</h1>
