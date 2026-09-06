@@ -28,6 +28,37 @@ const NAV_LINKS = [
   { label: 'FAQ', target: 'faq' as const },
 ]
 
+/** Restrained account entry point — a text link either way, never a button
+ * competing visually with the primary CTA. Signed-in state shows the
+ * username stored at signup (see authService.signUp's user metadata), not
+ * the email — email is never the public identity (see
+ * docs/VALPRO_PHASE_4_REPORT.md). Rendered even when no Supabase project is
+ * configured: tapping "Sign In" then honestly explains accounts aren't
+ * available yet (AuthShell.tsx) rather than hiding the entry point, which
+ * would look like an even less finished feature. */
+function AccountEntry({ compact = false }: { compact?: boolean }) {
+  const { session, signOutUser, goTo } = useApp()
+  const size = compact ? 'text-[9.5px]' : 'text-[13px]'
+
+  if (session) {
+    const username = typeof session.user.user_metadata?.username === 'string' ? session.user.user_metadata.username : 'Account'
+    return (
+      <div className={`flex items-center gap-2 ${size} font-medium`}>
+        <span className="text-[var(--color-text)]/90">{username}</span>
+        <button type="button" onClick={() => signOutUser()} className="text-[var(--color-muted)] hover:text-[var(--color-accent-blue)]">
+          Sign Out
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button type="button" onClick={() => goTo('signIn')} className={`${size} font-medium text-[var(--color-text)]/90 hover:text-[var(--color-accent-blue)]`}>
+      Sign In
+    </button>
+  )
+}
+
 function NavMenuButton({ open, onClick }: { open: boolean; onClick: () => void }) {
   return (
     <button
@@ -85,13 +116,16 @@ export function Welcome() {
                 <Wordmark markClassName="h-5 w-5" />
                 <p className="mt-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">A Bhasad.org Product</p>
               </div>
-              <div className="flex items-center gap-2">
-                <nav className="flex items-center gap-2.5 text-[9.5px] font-medium text-[var(--color-text)]/95">
+              <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5">
+                <nav className="flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 text-[9.5px] font-medium text-[var(--color-text)]/95">
                   {NAV_LINKS.map((link) => (
-                    <button key={link.label} type="button" onClick={() => goTo(link.target)} className="hover:text-[var(--color-accent-blue)]">
+                    <button key={link.label} type="button" onClick={() => goTo(link.target)} className="whitespace-nowrap hover:text-[var(--color-accent-blue)]">
                       {link.label}
                     </button>
                   ))}
+                  <span className="whitespace-nowrap">
+                    <AccountEntry compact />
+                  </span>
                 </nav>
                 <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
               </div>
@@ -188,6 +222,7 @@ export function Welcome() {
                     </button>
                   ))}
                 </nav>
+                <AccountEntry />
                 <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
               </div>
             </div>

@@ -174,4 +174,29 @@ describe('ValPro end-to-end flow', () => {
     expect(screen.queryByText(/a simple question started it all/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/from your profile to a decision/i)).not.toBeInTheDocument()
   })
+
+  it('navigates Welcome -> Sign In -> Sign Up -> back -> Welcome, honestly explaining accounts aren\'t live yet', async () => {
+    // No Supabase project is configured in this test environment (nor in
+    // the actual deployed app today) — this exercises real navigation and
+    // confirms the honest "not available yet" state renders, not a mocked
+    // successful login (that's authService.mocked.test.ts's job).
+    localStorage.clear()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getAllByRole('button', { name: /^sign in$/i })[0])
+    expect(await screen.findByRole('heading', { name: /^sign in$/i })).toBeInTheDocument()
+    expect(screen.getByText(/accounts aren't available yet/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^sign in$/i })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: /create account/i }))
+    expect(await screen.findByRole('heading', { name: /create account/i })).toBeInTheDocument()
+    expect(screen.getByText(/accounts aren't available yet/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /go back/i }))
+    expect(await screen.findByRole('heading', { name: /^sign in$/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /go back/i }))
+    expect((await screen.findAllByText(/know your/i))[0]).toBeInTheDocument()
+  })
 })

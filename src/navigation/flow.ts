@@ -16,6 +16,9 @@ export type ScreenId =
   | 'creators'
   | 'howItWorks'
   | 'faq'
+  | 'signIn'
+  | 'signUp'
+  | 'forgotPassword'
   | OnboardingScreenId
   | 'analysis'
   | 'result'
@@ -24,9 +27,9 @@ export type ScreenId =
   | 'whatif'
   | 'share'
 
-/** The linear step order for Next/Back. `creators`, `howItWorks` and `faq`
- * are side excursions from Welcome (reached and left via the history stack
- * in AppContext), not steps. */
+/** The linear step order for Next/Back. `creators`, `howItWorks`, `faq`,
+ * and the auth screens are side excursions from Welcome (reached and left
+ * via the history stack in AppContext), not steps. */
 export const SCREEN_ORDER: ScreenId[] = [
   'welcome',
   ...ONBOARDING_SCREENS,
@@ -72,6 +75,14 @@ const BACKDROPS: Record<ScreenId, string> = {
   // its backdrop rather than introducing a new image.
   howItWorks: 'backdrops/creators.jpg',
   faq: 'backdrops/creators.jpg',
+  // Not welcome.jpg: that image has mockup text baked in that needs the
+  // heavier 'hero' Backdrop scrim (see Backdrop.tsx) to hide — paired with
+  // AuthShell's 'standard' scrim (meant for a plain decorative photo, like
+  // every other non-Welcome screen uses), the baked text visibly bled
+  // through behind the form. creators.jpg has no baked text.
+  signIn: 'backdrops/creators.jpg',
+  signUp: 'backdrops/creators.jpg',
+  forgotPassword: 'backdrops/creators.jpg',
   role: 'backdrops/onboarding.jpg',
   domain: 'backdrops/onboarding.jpg',
   education: 'backdrops/onboarding.jpg',

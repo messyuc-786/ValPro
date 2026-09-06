@@ -15,7 +15,7 @@ import { isSupabaseConfigured } from '../../auth/authService'
  */
 export function AuthShell({ title, subtitle, children, onBack }: { title: string; subtitle: string; children?: ReactNode; onBack?: () => void }) {
   return (
-    <Backdrop image={backdropFor('welcome')} variant="standard">
+    <Backdrop image={backdropFor('signIn')} variant="standard">
       <div className="flex h-full min-h-full flex-col px-6 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(1.5rem_+_env(safe-area-inset-top))]">
         <div className="flex items-center justify-between">
           <Wordmark />

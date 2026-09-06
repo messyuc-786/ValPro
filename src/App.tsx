@@ -3,6 +3,9 @@ import { Welcome } from './screens/Welcome'
 import { CreatorStory } from './screens/CreatorStory'
 import { HowItWorks } from './screens/HowItWorks'
 import { Faq } from './screens/Faq'
+import { SignIn } from './screens/auth/SignIn'
+import { SignUp } from './screens/auth/SignUp'
+import { ForgotPassword } from './screens/auth/ForgotPassword'
 import { YourRole } from './screens/YourRole'
 import { DomainSelection } from './screens/DomainSelection'
 import { Education } from './screens/Education'
@@ -20,11 +23,30 @@ import { ShareResult } from './screens/ShareResult'
 import type { ReactElement } from 'react'
 import type { ScreenId } from './navigation/flow'
 
+/** Thin adapters wiring the standalone auth screens (which take plain
+ * callback props, so they're usable/testable outside the app's navigation
+ * too) into AppContext's goTo/goBack. */
+function SignInScreen() {
+  const { goTo, goBack } = useApp()
+  return <SignIn onBack={goBack} onSignedIn={() => goTo('welcome')} onGoToSignUp={() => goTo('signUp')} onGoToForgotPassword={() => goTo('forgotPassword')} />
+}
+function SignUpScreen() {
+  const { goTo, goBack } = useApp()
+  return <SignUp onBack={goBack} onSignedUp={() => goTo('welcome')} onGoToSignIn={() => goTo('signIn')} />
+}
+function ForgotPasswordScreen() {
+  const { goBack } = useApp()
+  return <ForgotPassword onBack={goBack} />
+}
+
 const SCREEN_COMPONENTS: Record<ScreenId, () => ReactElement | null> = {
   welcome: Welcome,
   creators: CreatorStory,
   howItWorks: HowItWorks,
   faq: Faq,
+  signIn: SignInScreen,
+  signUp: SignUpScreen,
+  forgotPassword: ForgotPasswordScreen,
   role: YourRole,
   domain: DomainSelection,
   education: Education,
