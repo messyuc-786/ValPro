@@ -1,16 +1,20 @@
 import { useApp } from '../state/AppContext'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
-import { IconChevronLeft } from '../ui/icons'
+import { IconArrowRight, IconChevronLeft } from '../ui/icons'
 import { backdropFor } from '../navigation/flow'
 
 /**
  * "Why ValPro Exists" — a dedicated full-screen page (per the package's
  * "prefer an expandable story or dedicated page" direction) rather than a
  * modal, so it reads as an editorial piece and not an interruption.
+ *
+ * Scope is deliberately narrow: the creator/origin story only. The product
+ * mechanics live on How It Works, and practical Q&A lives on FAQ — none of
+ * the three repeats another's content (see docs comments on those screens).
  */
 export function CreatorStory() {
-  const { goBack } = useApp()
+  const { goBack, goTo } = useApp()
 
   return (
     <Backdrop image={backdropFor('creators')}>
@@ -54,13 +58,8 @@ export function CreatorStory() {
             career switchers and people across domains can face the same uncertainty.
           </p>
           <p className="mt-3 text-[14px] leading-relaxed text-[var(--color-muted)]">
-            ValPro was conceived to help people understand their professional market position using relevant profile
-            signals such as education, experience, skills, certifications, achievements, location, domain and market
-            relevance.
-          </p>
-          <p className="mt-3 text-[13px] leading-relaxed text-[var(--color-muted)]">
-            ValPro provides an informed market-value estimate and explains the factors behind it — it does not present
-            a modeled estimate as a guaranteed salary or promise of compensation.
+            That recurring question — asked in interview rooms, appraisal cycles and career pivots — is what ValPro was
+            built to answer honestly.
           </p>
 
           <div className="mt-8 border-t border-[var(--color-line)] pt-5">
@@ -72,6 +71,23 @@ export function CreatorStory() {
           <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
             Know Today. Negotiate Better. Grow Further.
           </p>
+
+          <div className="mt-6 flex flex-col items-start gap-2.5 border-t border-[var(--color-line)] pt-5">
+            <button
+              type="button"
+              onClick={() => goTo('howItWorks')}
+              className="inline-flex items-center gap-1.5 border-b border-[var(--color-accent)] pb-0.5 text-[13px] font-semibold text-[var(--color-accent)]"
+            >
+              See How It Works <IconArrowRight className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo('faq')}
+              className="inline-flex items-center gap-1.5 border-b border-[var(--color-accent)] pb-0.5 text-[13px] font-semibold text-[var(--color-accent)]"
+            >
+              Read the FAQ <IconArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 flex justify-center">

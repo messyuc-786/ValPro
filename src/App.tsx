@@ -1,6 +1,8 @@
 import { AppProvider, useApp } from './state/AppContext'
 import { Welcome } from './screens/Welcome'
 import { CreatorStory } from './screens/CreatorStory'
+import { HowItWorks } from './screens/HowItWorks'
+import { Faq } from './screens/Faq'
 import { YourRole } from './screens/YourRole'
 import { DomainSelection } from './screens/DomainSelection'
 import { Education } from './screens/Education'
@@ -21,6 +23,8 @@ import type { ScreenId } from './navigation/flow'
 const SCREEN_COMPONENTS: Record<ScreenId, () => ReactElement | null> = {
   welcome: Welcome,
   creators: CreatorStory,
+  howItWorks: HowItWorks,
+  faq: Faq,
   role: YourRole,
   domain: DomainSelection,
   education: Education,

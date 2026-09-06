@@ -14,6 +14,8 @@ export type OnboardingScreenId = (typeof ONBOARDING_SCREENS)[number]
 export type ScreenId =
   | 'welcome'
   | 'creators'
+  | 'howItWorks'
+  | 'faq'
   | OnboardingScreenId
   | 'analysis'
   | 'result'
@@ -22,8 +24,9 @@ export type ScreenId =
   | 'whatif'
   | 'share'
 
-/** The linear step order for Next/Back. `creators` is a side excursion from
- * Welcome (reached and left via the history stack in AppContext), not a step. */
+/** The linear step order for Next/Back. `creators`, `howItWorks` and `faq`
+ * are side excursions from Welcome (reached and left via the history stack
+ * in AppContext), not steps. */
 export const SCREEN_ORDER: ScreenId[] = [
   'welcome',
   ...ONBOARDING_SCREENS,
@@ -64,6 +67,11 @@ export function previousScreen(current: ScreenId): ScreenId {
 const BACKDROPS: Record<ScreenId, string> = {
   welcome: 'backdrops/welcome.jpg',
   creators: 'backdrops/creators.jpg',
+  // Same visual family as About — these are the other two Welcome-nav side
+  // excursions, not new sections of the reference package, so they reuse
+  // its backdrop rather than introducing a new image.
+  howItWorks: 'backdrops/creators.jpg',
+  faq: 'backdrops/creators.jpg',
   role: 'backdrops/onboarding.jpg',
   domain: 'backdrops/onboarding.jpg',
   education: 'backdrops/onboarding.jpg',

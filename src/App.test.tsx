@@ -144,4 +144,34 @@ describe('ValPro end-to-end flow', () => {
     await user.click(screen.getAllByRole('button', { name: /go back/i })[0])
     expect((await screen.findAllByText(/know your/i))[0]).toBeInTheDocument()
   })
+
+  it('routes About, How it Works and FAQ to three distinct, non-duplicated screens', async () => {
+    localStorage.clear()
+    const user = userEvent.setup()
+    render(<App />)
+
+    // About — the creator/origin story only.
+    await user.click(screen.getAllByRole('button', { name: /^about$/i })[0])
+    expect(await screen.findByText(/why valpro exists/i)).toBeInTheDocument()
+    expect(screen.getByText(/a simple question started it all/i)).toBeInTheDocument()
+    // Must not contain How It Works' step list or FAQ's Q&A content.
+    expect(screen.queryByText(/from your profile to a decision/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/questions people actually ask/i)).not.toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: /go back/i })[0])
+
+    // How it Works — product mechanics only, no origin story.
+    await user.click(screen.getAllByRole('button', { name: /how it works/i })[0])
+    expect(await screen.findByText(/from your profile to a decision/i)).toBeInTheDocument()
+    expect(screen.getByText(/no verified evidence, no invented number/i)).toBeInTheDocument()
+    expect(screen.queryByText(/a simple question started it all/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/questions people actually ask/i)).not.toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: /go back/i })[0])
+
+    // FAQ — practical Q&A only, no origin story, no step list.
+    await user.click(screen.getAllByRole('button', { name: /^faq$/i })[0])
+    expect(await screen.findByText(/questions people actually ask/i)).toBeInTheDocument()
+    expect(screen.getByText(/is it a salary calculator/i)).toBeInTheDocument()
+    expect(screen.queryByText(/a simple question started it all/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/from your profile to a decision/i)).not.toBeInTheDocument()
+  })
 })

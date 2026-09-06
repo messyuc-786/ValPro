@@ -18,13 +18,14 @@ const VALUE_POINTS = [
   { label: 'Built for Better Decisions', icon: IconTarget },
 ]
 
-// "About" and "How it Works" both point at the one substantive page this
-// product actually has today (the creator story) — real navigation to real
-// content, not decorative dead links reserved for pages that don't exist yet.
+// Each nav link now routes to its own distinct screen — About (the creator
+// story), How it Works (product mechanics), and FAQ (practical Q&A) no
+// longer all point at the same page. See those screens' own doc comments
+// for why none of the three repeats another's content.
 const NAV_LINKS = [
   { label: 'About', target: 'creators' as const },
-  { label: 'How it Works', target: 'creators' as const },
-  { label: 'FAQ', target: 'creators' as const },
+  { label: 'How it Works', target: 'howItWorks' as const },
+  { label: 'FAQ', target: 'faq' as const },
 ]
 
 function NavMenuButton({ open, onClick }: { open: boolean; onClick: () => void }) {
