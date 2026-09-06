@@ -10,9 +10,11 @@ export const bankingPack: DomainPack = {
   label: 'Banking & Finance',
   shortLabel: 'Banking',
   description: 'Banking, Investment, FinTech, and related roles.',
-  benchmarkStatus: 'demo',
+  category: 'Finance & Business',
+  evidenceStatus: 'partial',
 
   benchmark: {
+    dataSource: 'development_fixture',
   baseValueLPA: 5.8,
   perYearExperienceLPA: 1.15,
   experienceCapYears: 18,

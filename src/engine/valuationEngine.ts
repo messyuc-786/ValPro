@@ -10,8 +10,9 @@
  *
  * The engine never claims to represent live market data — see honesty rules in
  * the product requirements doc. For a domain with no calibrated benchmark at
- * all (DomainPack.benchmarkStatus === 'insufficient'), it does not fabricate
- * one — evaluateProfile() returns an InsufficientEvidenceResult instead.
+ * all (DomainPack.evidenceStatus === 'insufficient'), it does not fabricate
+ * one — evaluateProfile() returns an InsufficientEvidenceResult instead,
+ * with a reason, what evidence is missing, and a real next action.
  */
 import type { DomainBenchmark, DomainPack, ScenarioDefinition } from '../types/domain'
 import type {
@@ -20,8 +21,8 @@ import type {
   Profile,
   RoleLevel,
 } from '../types/profile'
-import { experienceYears } from '../types/profile'
-import type { Confidence, DemoValuationResult, ScenarioResult, Signal, ValueGap, ValuationResult } from '../types/valuation'
+import { DOMAIN_OPTIONS, experienceYears } from '../types/profile'
+import type { Confidence, EvaluatedValuationResult, ScenarioResult, Signal, ValueGap, ValuationResult } from '../types/valuation'
 import { getDomainPack } from '../domains/registry'
 
 const ACHIEVEMENT_BASE_VALUE_LPA: Record<AchievementEntry['category'], number> = {
@@ -325,13 +326,39 @@ function nextMovesFromGaps(gaps: ValueGap[]): string[] {
   return gaps.map((g) => phrasing[g.id] ?? `Address: ${g.label}`)
 }
 
+/** Nearby domains suggested to a user hitting an insufficient-evidence
+ * result, grouped by DOMAIN_OPTIONS category — a concrete, real action
+ * ("try Technology instead"), not just "wait for us to add data". Falls
+ * back to the two domains with the broadest applicability if a domain has
+ * no evidenced sibling in its own category yet. */
+function suggestedDomainAction(pack: DomainPack): string {
+  const sameCategory = DOMAIN_OPTIONS.filter((d) => d.category === pack.category && d.id !== pack.id)
+    .map((d) => getDomainPack(d.id))
+    .filter((p) => p.evidenceStatus !== 'insufficient')
+  const candidates = sameCategory.length > 0 ? sameCategory : [getDomainPack('technology'), getDomainPack('fresher')]
+  const labels = candidates.slice(0, 2).map((p) => p.label)
+  return `Your profile has been saved. You can pick a different domain we already cover — for example ${labels.join(' or ')} — to see a real estimate today, or check back once ${pack.label} has verified data.`
+}
+
 export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): ValuationResult {
   const domainId = domainIdOverride ?? profile.domain ?? 'technology'
   const pack = getDomainPack(domainId)
   const asOf = new Date().toISOString().slice(0, 10)
 
-  if (pack.benchmarkStatus === 'insufficient' || !pack.benchmark) {
-    return { domainId, asOf, marketEvidence: 'insufficient' }
+  if (pack.evidenceStatus === 'insufficient' || !pack.benchmark) {
+    const missingEvidence = [
+      'A calibrated compensation model for this domain (see src/types/marketEvidence.ts for what qualifies)',
+      'Verified role/experience-band ranges specific to this domain',
+    ]
+    return {
+      domainId,
+      asOf,
+      marketEvidence: 'insufficient',
+      reason: `ValPro doesn't yet have a calibrated market-value model for ${pack.label}.`,
+      missingEvidence,
+      suggestedAction: suggestedDomainAction(pack),
+      profileCompletenessRatio: completeness(profile),
+    }
   }
   const benchmark = pack.benchmark
 
@@ -350,10 +377,15 @@ export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): 
   const score = Math.round(Math.min(98, Math.max(8, 40 + normalizedPosition * 100)))
   const percentileTopPercent = Math.round(Math.min(95, Math.max(2, 100 - score)))
 
-  const result: DemoValuationResult = {
+  const result: EvaluatedValuationResult = {
     domainId,
     asOf,
-    marketEvidence: 'demo',
+    // Every populated benchmark today is a development fixture (see
+    // DomainBenchmark.dataSource) — 'supported' is reserved for a benchmark
+    // actually built from a verified MarketEvidenceSource, which this
+    // engine will honor automatically the day one exists (no engine change
+    // needed, just benchmark.dataSource + pack.evidenceStatus flipping).
+    marketEvidence: benchmark.dataSource === 'verified_market_data' ? 'supported' : 'partial',
     marketValueLPA: Math.round(marketValue * 10) / 10,
     lowerRangeLPA: Math.round(lowerRange * 10) / 10,
     upperRangeLPA: Math.round(upperRange * 10) / 10,

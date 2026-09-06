@@ -11,9 +11,11 @@ export const educationPack: DomainPack = {
   label: 'Education',
   shortLabel: 'Education',
   description: 'Teaching, Academics, and Administration roles.',
-  benchmarkStatus: 'demo',
+  category: 'Public, Health & Research',
+  evidenceStatus: 'partial',
 
   benchmark: {
+    dataSource: 'development_fixture',
   baseValueLPA: 3.6,
   perYearExperienceLPA: 0.5,
   experienceCapYears: 25,

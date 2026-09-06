@@ -34,6 +34,7 @@ export type DomainId =
   | 'manufacturing'
   | 'engineering'
   | 'architecture'
+  | 'design'
   | 'media'
   | 'hospitality'
   | 'retail'
@@ -49,48 +50,80 @@ export type DomainId =
   | 'customer_success'
   | 'skilled_trades'
   | 'entrepreneur'
+  | 'business'
+  | 'nonprofit'
+  | 'career_switcher'
   | 'other'
+
+/** Fixed grouping for Domain Selection's search/section UI (see
+ * DomainSelection.tsx) — every DOMAIN_OPTIONS entry's `category` is one of
+ * these. Order here is display order. */
+export const DOMAIN_CATEGORIES = [
+  'Technology & Data',
+  'Finance & Business',
+  'People & Operations',
+  'Sales, Marketing & Real Estate',
+  'Industrial & Technical',
+  'Creative & Hospitality',
+  'Public, Health & Research',
+  'Career Stage',
+  'Other',
+] as const
+export type DomainCategory = (typeof DOMAIN_CATEGORIES)[number]
 
 /**
  * Every professional domain the app lets a user select. Four of these
- * (technology, banking, education, fresher) have a hand-authored demo
- * benchmark model behind them (see src/domains/*.ts) — the rest are fully
- * selectable but have no calibration yet, so Result shows an honest
- * "insufficient market evidence" state for them rather than a fabricated
- * number (see DomainPack.benchmarkStatus and the valuation engine).
+ * (technology, banking, education, fresher) have a hand-authored
+ * development-fixture benchmark model behind them (see src/domains/*.ts) —
+ * the rest are fully selectable but have no calibration yet, so Result
+ * shows an honest "insufficient market evidence" state for them rather
+ * than a fabricated number (see DomainPack.evidenceStatus and the
+ * valuation engine).
  */
-export const DOMAIN_OPTIONS: { id: DomainId; label: string; detail: string }[] = [
-  { id: 'technology', label: 'Technology / IT', detail: 'Software, Data, AI, Cloud, etc.' },
-  { id: 'banking', label: 'Banking & Finance', detail: 'Banking, Investment, FinTech, etc.' },
-  { id: 'education', label: 'Education', detail: 'Teaching, Academics, Administration' },
-  { id: 'healthcare', label: 'Healthcare', detail: 'Clinical, Nursing, Hospital Administration' },
-  { id: 'sales', label: 'Sales', detail: 'B2B, B2C, Enterprise, Field Sales' },
-  { id: 'marketing', label: 'Marketing', detail: 'Brand, Digital, Growth, Content' },
-  { id: 'hr', label: 'Human Resources', detail: 'Talent, People Ops, L&D' },
-  { id: 'operations', label: 'Operations', detail: 'Business & Process Operations' },
-  { id: 'legal', label: 'Legal', detail: 'Corporate Law, Compliance, Litigation' },
-  { id: 'consulting', label: 'Consulting', detail: 'Strategy, Management, Advisory' },
-  { id: 'accounting', label: 'Accounting / Audit', detail: 'Accounting, Audit, Taxation' },
-  { id: 'manufacturing', label: 'Manufacturing', detail: 'Plant Operations, Production, Quality' },
-  { id: 'engineering', label: 'Engineering', detail: 'Core / Non-IT Engineering Disciplines' },
-  { id: 'architecture', label: 'Architecture / Design', detail: 'Architecture, Interior, Urban Design' },
-  { id: 'media', label: 'Media / Content', detail: 'Journalism, Film, Content Creation' },
-  { id: 'hospitality', label: 'Hospitality / Travel', detail: 'Hotels, Travel, Tourism' },
-  { id: 'retail', label: 'Retail', detail: 'Retail Operations & Management' },
-  { id: 'logistics', label: 'Logistics / Supply Chain', detail: 'Supply Chain, Warehousing, Freight' },
-  { id: 'real_estate', label: 'Real Estate', detail: 'Real Estate Sales, Development, PropTech' },
-  { id: 'government', label: 'Government / Public Sector', detail: 'Civil Services, Public Administration' },
-  { id: 'research', label: 'Research / Science', detail: 'R&D, Academic & Industrial Research' },
-  { id: 'pharma', label: 'Pharmaceuticals', detail: 'Pharma R&D, Manufacturing, Regulatory' },
-  { id: 'telecom', label: 'Telecom', detail: 'Telecommunications & Networks' },
-  { id: 'data_analytics', label: 'Data / Analytics', detail: 'Data Science, BI, Analytics' },
-  { id: 'product_management', label: 'Product Management', detail: 'Product Strategy & Delivery' },
-  { id: 'project_management', label: 'Project Management', detail: 'Program & Project Delivery' },
-  { id: 'customer_success', label: 'Customer Success / Support', detail: 'CS, Support, Account Management' },
-  { id: 'skilled_trades', label: 'Skilled Trades', detail: 'Electrical, Plumbing, Technical Trades' },
-  { id: 'entrepreneur', label: 'Entrepreneur / Founder', detail: 'Founders & Self-Employed' },
-  { id: 'fresher', label: 'Fresher / Student', detail: 'Students, Graduates, Entry Level' },
-  { id: 'other', label: 'Other', detail: "Doesn't fit the categories above" },
+export const DOMAIN_OPTIONS: { id: DomainId; label: string; detail: string; category: DomainCategory }[] = [
+  { id: 'technology', label: 'Technology / IT', detail: 'Software, Data, AI, Cloud, etc.', category: 'Technology & Data' },
+  { id: 'data_analytics', label: 'Data / Analytics', detail: 'Data Science, BI, Analytics', category: 'Technology & Data' },
+  { id: 'telecom', label: 'Telecom', detail: 'Telecommunications & Networks', category: 'Technology & Data' },
+
+  { id: 'banking', label: 'Banking & Finance', detail: 'Banking, Investment, FinTech, etc.', category: 'Finance & Business' },
+  { id: 'accounting', label: 'Accounting / Audit', detail: 'Accounting, Audit, Taxation', category: 'Finance & Business' },
+  { id: 'business', label: 'Business', detail: 'General Business & Strategy Roles', category: 'Finance & Business' },
+  { id: 'consulting', label: 'Consulting', detail: 'Strategy, Management, Advisory', category: 'Finance & Business' },
+  { id: 'entrepreneur', label: 'Entrepreneur / Founder', detail: 'Founders & Self-Employed', category: 'Finance & Business' },
+  { id: 'legal', label: 'Legal', detail: 'Corporate Law, Compliance, Litigation', category: 'Finance & Business' },
+
+  { id: 'hr', label: 'Human Resources', detail: 'Talent, People Ops, L&D', category: 'People & Operations' },
+  { id: 'operations', label: 'Operations', detail: 'Business & Process Operations', category: 'People & Operations' },
+  { id: 'product_management', label: 'Product Management', detail: 'Product Strategy & Delivery', category: 'People & Operations' },
+  { id: 'project_management', label: 'Project Management', detail: 'Program & Project Delivery', category: 'People & Operations' },
+  { id: 'customer_success', label: 'Customer Success / Support', detail: 'CS, Support, Account Management', category: 'People & Operations' },
+
+  { id: 'sales', label: 'Sales', detail: 'B2B, B2C, Enterprise, Field Sales', category: 'Sales, Marketing & Real Estate' },
+  { id: 'marketing', label: 'Marketing', detail: 'Brand, Digital, Growth, Content', category: 'Sales, Marketing & Real Estate' },
+  { id: 'retail', label: 'Retail', detail: 'Retail Operations & Management', category: 'Sales, Marketing & Real Estate' },
+  { id: 'real_estate', label: 'Real Estate', detail: 'Real Estate Sales, Development, PropTech', category: 'Sales, Marketing & Real Estate' },
+
+  { id: 'manufacturing', label: 'Manufacturing', detail: 'Plant Operations, Production, Quality', category: 'Industrial & Technical' },
+  { id: 'engineering', label: 'Engineering', detail: 'Core / Non-IT Engineering Disciplines', category: 'Industrial & Technical' },
+  { id: 'logistics', label: 'Logistics / Supply Chain', detail: 'Supply Chain, Warehousing, Freight', category: 'Industrial & Technical' },
+  { id: 'skilled_trades', label: 'Skilled Trades', detail: 'Electrical, Plumbing, Technical Trades', category: 'Industrial & Technical' },
+
+  { id: 'media', label: 'Media / Content', detail: 'Journalism, Film, Content Creation', category: 'Creative & Hospitality' },
+  { id: 'design', label: 'Design', detail: 'Graphic, Product, UX/UI Design', category: 'Creative & Hospitality' },
+  { id: 'architecture', label: 'Architecture', detail: 'Architecture, Interior, Urban Design', category: 'Creative & Hospitality' },
+  { id: 'hospitality', label: 'Hospitality / Travel', detail: 'Hotels, Travel, Tourism', category: 'Creative & Hospitality' },
+
+  { id: 'education', label: 'Education', detail: 'Teaching, Academics, Administration', category: 'Public, Health & Research' },
+  { id: 'healthcare', label: 'Healthcare', detail: 'Clinical, Nursing, Hospital Administration', category: 'Public, Health & Research' },
+  { id: 'pharma', label: 'Pharmaceuticals', detail: 'Pharma R&D, Manufacturing, Regulatory', category: 'Public, Health & Research' },
+  { id: 'research', label: 'Research / Science', detail: 'R&D, Academic & Industrial Research', category: 'Public, Health & Research' },
+  { id: 'government', label: 'Government / Public Sector', detail: 'Civil Services, Public Administration', category: 'Public, Health & Research' },
+  { id: 'nonprofit', label: 'Non-Profit / Social Sector', detail: 'NGOs, Social Impact, Development', category: 'Public, Health & Research' },
+
+  { id: 'fresher', label: 'Fresher / Student', detail: 'Students, Graduates, Entry Level', category: 'Career Stage' },
+  { id: 'career_switcher', label: 'Career Switcher', detail: 'Moving into a New Field or Function', category: 'Career Stage' },
+
+  { id: 'other', label: 'Other', detail: "Doesn't fit the categories above", category: 'Other' },
 ]
 
 export type RoleLevel = 'entry' | 'junior' | 'mid' | 'senior' | 'lead'

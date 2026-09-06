@@ -8,9 +8,9 @@ import { insufficientDomainPacks } from './insufficientDomains'
 
 /**
  * Domain pack registry. Adding a new domain with REAL data means writing one
- * new pack file (benchmarkStatus: 'demo') and registering it here in place
- * of its insufficientDomains.ts entry — the valuation engine and every
- * screen are domain-agnostic and never branch on `domainId`.
+ * new pack file (evidenceStatus: 'partial' or 'supported') and registering
+ * it here in place of its insufficientDomains.ts entry — the valuation
+ * engine and every screen are domain-agnostic and never branch on `domainId`.
  */
 export const domainRegistry: Record<DomainId, DomainPack> = {
   technology: technologyPack,

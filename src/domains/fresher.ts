@@ -11,9 +11,11 @@ export const fresherPack: DomainPack = {
   label: 'Fresher / Student',
   shortLabel: 'Fresher',
   description: 'Students, graduates, and entry-level candidates.',
-  benchmarkStatus: 'demo',
+  category: 'Career Stage',
+  evidenceStatus: 'partial',
 
   benchmark: {
+  dataSource: 'development_fixture',
   baseValueLPA: 3.2,
   perYearExperienceLPA: 0.9,
   experienceCapYears: 2,

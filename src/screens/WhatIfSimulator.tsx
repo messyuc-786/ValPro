@@ -8,7 +8,7 @@ import { backdropFor } from '../navigation/flow'
 
 export function WhatIfSimulator() {
   const { result, goTo, goBack } = useApp()
-  if (!result || result.marketEvidence !== 'demo') return null
+  if (!result || result.marketEvidence === 'insufficient') return null
 
   return (
     <Backdrop image={backdropFor('whatif')}>

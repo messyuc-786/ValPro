@@ -36,7 +36,7 @@ function buildShareSvg(marketValue: number, score: number, topPercent: number, d
 export function ShareResult() {
   const { result, goBack, restart } = useApp()
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
-  if (!result || result.marketEvidence !== 'demo') return null
+  if (!result || result.marketEvidence === 'insufficient') return null
   // Captured as locals rather than read off `result` inside the closures
   // below: TypeScript's discriminated-union narrowing from the guard above
   // doesn't persist into nested function bodies that capture the outer

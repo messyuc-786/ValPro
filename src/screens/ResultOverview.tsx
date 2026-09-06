@@ -18,6 +18,7 @@ export function ResultOverview() {
   // Share from here, since there is nothing computed for those to explain.
   if (result.marketEvidence === 'insufficient') {
     const domainLabel = DOMAIN_OPTIONS.find((d) => d.id === result.domainId)?.label ?? result.domainId
+    const completenessPercent = Math.round(result.profileCompletenessRatio * 100)
 
     return (
       <Backdrop image={backdropFor('result')}>
@@ -29,13 +30,26 @@ export function ResultOverview() {
 
           <p className="mt-8 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-accent)]">Market Evidence</p>
           <p className="mt-2 font-display text-[28px] font-medium leading-snug">Insufficient data for {domainLabel}</p>
-          <p className="mt-4 text-[14px] leading-relaxed text-[var(--color-muted)]">
-            We don't yet have a calibrated market-value model for this domain. Rather than guess, ValPro shows this honestly
-            instead of an invented number.
-          </p>
-          <p className="mt-3 text-[14px] leading-relaxed text-[var(--color-muted)]">
-            Your profile has been saved. This will produce a real estimate once we add verified benchmark data for{' '}
-            {domainLabel.toLowerCase()}.
+          <p className="mt-4 text-[14px] leading-relaxed text-[var(--color-muted)]">{result.reason} Rather than guess, ValPro says so honestly instead of showing an invented number.</p>
+
+          <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">What's Missing</p>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {result.missingEvidence.map((item) => (
+              <li key={item} className="flex gap-2 text-[13px] leading-relaxed text-[var(--color-muted)]">
+                <span aria-hidden="true" className="text-[var(--color-accent)]">
+                  —
+                </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">What You Can Do</p>
+          <p className="mt-2 text-[14px] leading-relaxed text-[var(--color-muted)]">{result.suggestedAction}</p>
+
+          <p className="mt-6 text-[11.5px] text-[var(--color-muted)]">
+            Your profile is <span className="font-semibold text-[var(--color-text)]">{completenessPercent}% complete</span> — that
+            work isn't lost; it's ready the moment {domainLabel.toLowerCase()} has verified data.
           </p>
         </div>
 

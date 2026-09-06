@@ -11,7 +11,7 @@ export function WhyThisValue() {
   // Only reachable from ResultOverview's "View Detailed Analysis", which is
   // never shown for an insufficient-evidence domain — this guard is a type
   // narrow + defensive fallback, not the primary gate.
-  if (!result || result.marketEvidence !== 'demo') return null
+  if (!result || result.marketEvidence === 'insufficient') return null
 
   return (
     <Backdrop image={backdropFor('why')}>

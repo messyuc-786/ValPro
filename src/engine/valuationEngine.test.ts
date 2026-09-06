@@ -3,16 +3,16 @@ import { createEmptyProfile } from '../types/profile'
 import type { Profile } from '../types/profile'
 import { applyScenario, deriveRoleLevel, evaluateProfile } from './valuationEngine'
 import { technologyPack } from '../domains/technology'
-import type { DemoValuationResult, ValuationResult } from '../types/valuation'
+import type { EvaluatedValuationResult, ValuationResult } from '../types/valuation'
 
 /** Every test below evaluates a domain known to have benchmark data
- * ('demo' evidence) — this asserts that and narrows the type, rather than
- * repeating the same `if (result.marketEvidence !== 'demo') throw` at every
- * call site. The 'insufficient' path has its own dedicated describe block
- * further down. */
-function asDemo(result: ValuationResult): DemoValuationResult {
-  expect(result.marketEvidence).toBe('demo')
-  if (result.marketEvidence !== 'demo') throw new Error('expected a demo-evidence result')
+ * ('partial' evidence — a development fixture, not verified market data)
+ * — this asserts that and narrows the type, rather than repeating the same
+ * `if (result.marketEvidence === 'insufficient') throw` at every call site.
+ * The 'insufficient' path has its own dedicated describe block further down. */
+function asEvaluated(result: ValuationResult): EvaluatedValuationResult {
+  expect(result.marketEvidence).toBe('partial')
+  if (result.marketEvidence === 'insufficient') throw new Error('expected an evaluated (non-insufficient) result')
   return result
 }
 
@@ -59,7 +59,7 @@ describe('deriveRoleLevel', () => {
 
 describe('evaluateProfile — Technology domain (supported market-data case)', () => {
   it('returns a coherent, internally consistent result', () => {
-    const result = asDemo(evaluateProfile(techProfile()))
+    const result = asEvaluated(evaluateProfile(techProfile()))
     expect(result.domainId).toBe('technology')
     expect(result.marketValueLPA).toBeGreaterThan(0)
     expect(result.lowerRangeLPA).toBeLessThan(result.marketValueLPA)
@@ -73,37 +73,37 @@ describe('evaluateProfile — Technology domain (supported market-data case)', (
 
   it('is deterministic for the same profile', () => {
     const profile = techProfile()
-    const a = asDemo(evaluateProfile(profile))
-    const b = asDemo(evaluateProfile(profile))
+    const a = asEvaluated(evaluateProfile(profile))
+    const b = asEvaluated(evaluateProfile(profile))
     expect(a.marketValueLPA).toBe(b.marketValueLPA)
     expect(a.score).toBe(b.score)
   })
 
   it('values more experience higher, holding everything else constant', () => {
-    const junior = asDemo(evaluateProfile(techProfile({ experience: { band: '1-3', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: false } })))
-    const senior = asDemo(evaluateProfile(techProfile({ experience: { band: '8-12', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: false } })))
+    const junior = asEvaluated(evaluateProfile(techProfile({ experience: { band: '1-3', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: false } })))
+    const senior = asEvaluated(evaluateProfile(techProfile({ experience: { band: '8-12', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: false } })))
     expect(senior.marketValueLPA).toBeGreaterThan(junior.marketValueLPA)
   })
 
   it('rewards a tier-1 institute over an unnamed one', () => {
-    const tier1 = asDemo(evaluateProfile(techProfile()))
-    const tier3 = asDemo(evaluateProfile(techProfile({ education: { ...techProfile().education, institute: 'City Skills Academy' } })))
+    const tier1 = asEvaluated(evaluateProfile(techProfile()))
+    const tier3 = asEvaluated(evaluateProfile(techProfile({ education: { ...techProfile().education, institute: 'City Skills Academy' } })))
     expect(tier1.marketValueLPA).toBeGreaterThan(tier3.marketValueLPA)
   })
 
   it('produces High confidence for a fully filled profile and Low for a bare one', () => {
-    const full = asDemo(evaluateProfile(techProfile()))
+    const full = asEvaluated(evaluateProfile(techProfile()))
     expect(full.confidence).toBe('High')
 
     const bare = createEmptyProfile()
     bare.role = 'fresher'
     bare.domain = 'technology'
-    const sparse = asDemo(evaluateProfile(bare))
+    const sparse = asEvaluated(evaluateProfile(bare))
     expect(sparse.confidence).toBe('Low')
   })
 
   it('ranks value gaps by potential impact, largest first', () => {
-    const result = asDemo(evaluateProfile(techProfile({ experience: { band: '3-5', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: false }, achievements: [] })))
+    const result = asEvaluated(evaluateProfile(techProfile({ experience: { band: '3-5', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: false }, achievements: [] })))
     expect(result.valueGaps.length).toBeGreaterThan(0)
     for (let i = 1; i < result.valueGaps.length; i++) {
       expect(result.valueGaps[i - 1].impactHighLPA).toBeGreaterThanOrEqual(result.valueGaps[i].impactHighLPA)
@@ -111,7 +111,7 @@ describe('evaluateProfile — Technology domain (supported market-data case)', (
   })
 
   it('never presents a leadership gap for someone who already has leadership experience', () => {
-    const result = asDemo(evaluateProfile(techProfile({ experience: { band: '3-5', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: true } })))
+    const result = asEvaluated(evaluateProfile(techProfile({ experience: { band: '3-5', currentRole: 'Software Engineer', currentCompany: 'X', industry: 'IT', hasLeadershipExperience: true } })))
     expect(result.valueGaps.some((g) => g.id === 'gap_leadership')).toBe(false)
     expect(result.positiveSignals.some((s) => s.id === 'leadership')).toBe(true)
   })
@@ -120,7 +120,7 @@ describe('evaluateProfile — Technology domain (supported market-data case)', (
     // NIL/None optional fields: a profile with zero skills/certs/achievements
     // must still evaluate without throwing and without a fabricated crash.
     const nil = techProfile({ skills: [], certifications: [], achievements: [] })
-    const result = asDemo(evaluateProfile(nil))
+    const result = asEvaluated(evaluateProfile(nil))
     expect(result.marketValueLPA).toBeGreaterThan(0)
   })
 })
@@ -134,7 +134,7 @@ describe('evaluateProfile — Fresher domain never returns zero value', () => {
     fresher.experience = { band: 'lt1', currentRole: '', currentCompany: '', industry: '', hasLeadershipExperience: false }
     fresher.location = { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'India' }
 
-    const result = asDemo(evaluateProfile(fresher))
+    const result = asEvaluated(evaluateProfile(fresher))
     expect(result.marketValueLPA).toBeGreaterThan(2)
     expect(result.nextMoves.length).toBeGreaterThan(0)
   })
@@ -143,8 +143,8 @@ describe('evaluateProfile — Fresher domain never returns zero value', () => {
 describe('domain intelligence — same inputs, different domains diverge', () => {
   it('does not value a Technology and Education profile identically', () => {
     const base = techProfile()
-    const asEducation = asDemo(evaluateProfile({ ...base, domain: 'education' }))
-    const asTechnology = asDemo(evaluateProfile({ ...base, domain: 'technology' }))
+    const asEducation = asEvaluated(evaluateProfile({ ...base, domain: 'education' }))
+    const asTechnology = asEvaluated(evaluateProfile({ ...base, domain: 'technology' }))
     expect(asEducation.marketValueLPA).not.toBe(asTechnology.marketValueLPA)
   })
 })
@@ -152,15 +152,15 @@ describe('domain intelligence — same inputs, different domains diverge', () =>
 describe('applyScenario + What-If simulation', () => {
   it('adding a certification scenario increases the modeled value', () => {
     const profile = techProfile({ certifications: [] })
-    const before = asDemo(evaluateProfile(profile)).marketValueLPA
+    const before = asEvaluated(evaluateProfile(profile)).marketValueLPA
     const scenario = technologyPack.benchmark!.scenarioCatalog.find((s) => s.id === 'aws_cert')!
-    const after = asDemo(evaluateProfile(applyScenario(profile, scenario))).marketValueLPA
+    const after = asEvaluated(evaluateProfile(applyScenario(profile, scenario))).marketValueLPA
     expect(after).toBeGreaterThan(before)
   })
 
   it('every catalog scenario for the technology pack is reflected in scenario results', () => {
     const profile = techProfile()
-    const result = asDemo(evaluateProfile(profile))
+    const result = asEvaluated(evaluateProfile(profile))
     expect(result.scenarios.length).toBe(technologyPack.benchmark!.scenarioCatalog.length)
     result.scenarios.forEach((s) => {
       expect(typeof s.deltaLPA).toBe('number')
@@ -189,5 +189,93 @@ describe('evaluateProfile — insufficient market evidence (no benchmark for the
     const b = evaluateProfile(profile)
     expect(a.marketEvidence).toBe('insufficient')
     expect(b.marketEvidence).toBe('insufficient')
+  })
+
+  it('covers every newly-added domain from this phase (business, design, nonprofit, career_switcher)', () => {
+    for (const domain of ['business', 'design', 'nonprofit', 'career_switcher'] as const) {
+      const result = evaluateProfile(techProfile({ domain }))
+      expect(result.marketEvidence).toBe('insufficient')
+    }
+  })
+
+  it('gives a structured, explainable reason — not just a bare status flag', () => {
+    const result = evaluateProfile(techProfile({ domain: 'legal' }))
+    if (result.marketEvidence !== 'insufficient') throw new Error('expected insufficient evidence')
+    expect(result.reason.length).toBeGreaterThan(0)
+    expect(result.reason.toLowerCase()).toContain('legal')
+    expect(result.missingEvidence.length).toBeGreaterThan(0)
+    expect(result.suggestedAction.length).toBeGreaterThan(0)
+  })
+
+  it('suggests an evidenced sibling from the same category when one exists', () => {
+    // Legal shares its category (Finance & Business) with Banking & Finance,
+    // which does have a working benchmark — that's a more relevant
+    // suggestion than a generic fallback, so the engine should prefer it.
+    const result = evaluateProfile(techProfile({ domain: 'legal' }))
+    if (result.marketEvidence !== 'insufficient') throw new Error('expected insufficient evidence')
+    expect(result.suggestedAction).toMatch(/banking/i)
+  })
+
+  it('falls back to a real, currently-working domain when its own category has no evidenced sibling', () => {
+    // Marketing's category (Sales, Marketing & Real Estate) has no domain
+    // with a working benchmark, so the engine must fall back rather than
+    // recommend another insufficient-evidence domain in a loop.
+    const result = evaluateProfile(techProfile({ domain: 'marketing' }))
+    if (result.marketEvidence !== 'insufficient') throw new Error('expected insufficient evidence')
+    expect(result.suggestedAction).toMatch(/technology|fresher/i)
+  })
+
+  it('reflects real profile completeness even when no valuation can be computed', () => {
+    const complete = evaluateProfile(techProfile({ domain: 'legal' }))
+    const bare = createEmptyProfile()
+    bare.domain = 'legal'
+    const sparse = evaluateProfile(bare)
+    if (complete.marketEvidence !== 'insufficient' || sparse.marketEvidence !== 'insufficient') {
+      throw new Error('expected insufficient evidence for both')
+    }
+    expect(complete.profileCompletenessRatio).toBeGreaterThan(sparse.profileCompletenessRatio)
+    expect(complete.profileCompletenessRatio).toBeGreaterThan(0)
+    expect(sparse.profileCompletenessRatio).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('evaluateProfile — a domain with verified real data would flow through as "supported"', () => {
+  it('produces marketEvidence "supported" the moment a benchmark is tagged verified_market_data — no domain does this today', () => {
+    // No domain has real sourced data yet (see docs/VALPRO_PHASE_3_REPORT.md).
+    // This proves the architecture's 'supported' branch actually works,
+    // using the real technology benchmark object (registry-backed, so
+    // evaluateProfile's real code path runs) with only its dataSource flag
+    // flipped — exactly the one-field change "adding real data" means.
+    // Restored immediately after so no other test observes the mutation.
+    const original = technologyPack.benchmark!.dataSource
+    technologyPack.benchmark!.dataSource = 'verified_market_data'
+    try {
+      const result = evaluateProfile(techProfile())
+      expect(result.marketEvidence).toBe('supported')
+    } finally {
+      technologyPack.benchmark!.dataSource = original
+    }
+  })
+})
+
+describe('valuation integrity — no false precision', () => {
+  it('never reports more than one decimal place of LPA precision', () => {
+    const result = asEvaluated(evaluateProfile(techProfile()))
+    for (const value of [result.marketValueLPA, result.lowerRangeLPA, result.upperRangeLPA, result.potentialValueLPA]) {
+      const decimals = (value.toString().split('.')[1] || '').length
+      expect(decimals).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('widens the range for lower-confidence profiles rather than showing the same false-precise band', () => {
+    const highConfidence = asEvaluated(evaluateProfile(techProfile()))
+    const bare = createEmptyProfile()
+    bare.role = 'fresher'
+    bare.domain = 'technology'
+    const lowConfidence = asEvaluated(evaluateProfile(bare))
+
+    const highSpread = (highConfidence.upperRangeLPA - highConfidence.lowerRangeLPA) / highConfidence.marketValueLPA
+    const lowSpread = (lowConfidence.upperRangeLPA - lowConfidence.lowerRangeLPA) / lowConfidence.marketValueLPA
+    expect(lowSpread).toBeGreaterThan(highSpread)
   })
 })

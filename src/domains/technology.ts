@@ -13,9 +13,11 @@ export const technologyPack: DomainPack = {
   label: 'Technology / IT',
   shortLabel: 'Tech',
   description: 'Software, Data, AI, Cloud, and related engineering roles.',
-  benchmarkStatus: 'demo',
+  category: 'Technology & Data',
+  evidenceStatus: 'partial',
 
   benchmark: {
+    dataSource: 'development_fixture',
     baseValueLPA: 6.5,
     perYearExperienceLPA: 1.4,
     experienceCapYears: 15,
