@@ -3,14 +3,19 @@ import { ScreenShell } from '../ui/ScreenShell'
 import { OptionCard } from '../ui/OptionCard'
 import { Button } from '../ui/Button'
 import { DOMAIN_OPTIONS } from '../types/profile'
-import { IconBank, IconFresher, IconGraduationCap, IconLaptop } from '../ui/icons'
+import type { DomainId } from '../types/profile'
+import { IconBank, IconBriefcase, IconFresher, IconGraduationCap, IconLaptop } from '../ui/icons'
 
-const ICONS = {
+// A handful of domains get a bespoke icon; every other domain (the broader
+// taxonomy added for market coverage — see docs/VALPRO_CURRENT_BASELINE.md)
+// shares one restrained generic mark rather than 27 one-off icons designed
+// on a guess. Content, not decoration, is what's authoritative here.
+const ICONS: Partial<Record<DomainId, typeof IconLaptop>> = {
   technology: IconLaptop,
   banking: IconBank,
   education: IconGraduationCap,
   fresher: IconFresher,
-} as const
+}
 
 export function DomainSelection() {
   const { profile, dispatch, goNext, goBack } = useApp()
@@ -30,7 +35,7 @@ export function DomainSelection() {
 
       <div className="mt-6 flex flex-col gap-2.5">
         {DOMAIN_OPTIONS.map((d) => {
-          const Icon = ICONS[d.id]
+          const Icon = ICONS[d.id] ?? IconBriefcase
           return (
             <OptionCard
               key={d.id}

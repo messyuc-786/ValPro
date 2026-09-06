@@ -23,9 +23,15 @@ export interface ScenarioResult {
   deltaLPA: number
 }
 
-export interface ValuationResult {
+interface ValuationResultCommon {
   domainId: DomainId
   asOf: string // ISO date string — demo model, not a live feed
+}
+
+/** A domain with a calibrated (still demo, not live) benchmark model — the
+ * normal, full result. */
+export interface DemoValuationResult extends ValuationResultCommon {
+  marketEvidence: 'demo'
 
   marketValueLPA: number
   lowerRangeLPA: number
@@ -42,3 +48,12 @@ export interface ValuationResult {
   scenarios: ScenarioResult[]
   nextMoves: string[]
 }
+
+/** A domain with no benchmark calibration yet. Deliberately carries none of
+ * the numeric/explanatory fields above — there is nothing to show instead of
+ * inventing them. See Result screen for how this renders. */
+export interface InsufficientEvidenceResult extends ValuationResultCommon {
+  marketEvidence: 'insufficient'
+}
+
+export type ValuationResult = DemoValuationResult | InsufficientEvidenceResult

@@ -18,13 +18,79 @@ export const ROLE_TYPES: { id: RoleType; label: string; detail: string }[] = [
   { id: 'career_switcher', label: 'Career Switcher', detail: 'Transitioning to a new field' },
 ]
 
-export type DomainId = 'technology' | 'banking' | 'education' | 'fresher'
+export type DomainId =
+  | 'technology'
+  | 'banking'
+  | 'education'
+  | 'fresher'
+  | 'healthcare'
+  | 'sales'
+  | 'marketing'
+  | 'hr'
+  | 'operations'
+  | 'legal'
+  | 'consulting'
+  | 'accounting'
+  | 'manufacturing'
+  | 'engineering'
+  | 'architecture'
+  | 'media'
+  | 'hospitality'
+  | 'retail'
+  | 'logistics'
+  | 'real_estate'
+  | 'government'
+  | 'research'
+  | 'pharma'
+  | 'telecom'
+  | 'data_analytics'
+  | 'product_management'
+  | 'project_management'
+  | 'customer_success'
+  | 'skilled_trades'
+  | 'entrepreneur'
+  | 'other'
 
+/**
+ * Every professional domain the app lets a user select. Four of these
+ * (technology, banking, education, fresher) have a hand-authored demo
+ * benchmark model behind them (see src/domains/*.ts) — the rest are fully
+ * selectable but have no calibration yet, so Result shows an honest
+ * "insufficient market evidence" state for them rather than a fabricated
+ * number (see DomainPack.benchmarkStatus and the valuation engine).
+ */
 export const DOMAIN_OPTIONS: { id: DomainId; label: string; detail: string }[] = [
-  { id: 'technology', label: 'Technology', detail: 'Software, Data, AI, Cloud, etc.' },
+  { id: 'technology', label: 'Technology / IT', detail: 'Software, Data, AI, Cloud, etc.' },
   { id: 'banking', label: 'Banking & Finance', detail: 'Banking, Investment, FinTech, etc.' },
   { id: 'education', label: 'Education', detail: 'Teaching, Academics, Administration' },
+  { id: 'healthcare', label: 'Healthcare', detail: 'Clinical, Nursing, Hospital Administration' },
+  { id: 'sales', label: 'Sales', detail: 'B2B, B2C, Enterprise, Field Sales' },
+  { id: 'marketing', label: 'Marketing', detail: 'Brand, Digital, Growth, Content' },
+  { id: 'hr', label: 'Human Resources', detail: 'Talent, People Ops, L&D' },
+  { id: 'operations', label: 'Operations', detail: 'Business & Process Operations' },
+  { id: 'legal', label: 'Legal', detail: 'Corporate Law, Compliance, Litigation' },
+  { id: 'consulting', label: 'Consulting', detail: 'Strategy, Management, Advisory' },
+  { id: 'accounting', label: 'Accounting / Audit', detail: 'Accounting, Audit, Taxation' },
+  { id: 'manufacturing', label: 'Manufacturing', detail: 'Plant Operations, Production, Quality' },
+  { id: 'engineering', label: 'Engineering', detail: 'Core / Non-IT Engineering Disciplines' },
+  { id: 'architecture', label: 'Architecture / Design', detail: 'Architecture, Interior, Urban Design' },
+  { id: 'media', label: 'Media / Content', detail: 'Journalism, Film, Content Creation' },
+  { id: 'hospitality', label: 'Hospitality / Travel', detail: 'Hotels, Travel, Tourism' },
+  { id: 'retail', label: 'Retail', detail: 'Retail Operations & Management' },
+  { id: 'logistics', label: 'Logistics / Supply Chain', detail: 'Supply Chain, Warehousing, Freight' },
+  { id: 'real_estate', label: 'Real Estate', detail: 'Real Estate Sales, Development, PropTech' },
+  { id: 'government', label: 'Government / Public Sector', detail: 'Civil Services, Public Administration' },
+  { id: 'research', label: 'Research / Science', detail: 'R&D, Academic & Industrial Research' },
+  { id: 'pharma', label: 'Pharmaceuticals', detail: 'Pharma R&D, Manufacturing, Regulatory' },
+  { id: 'telecom', label: 'Telecom', detail: 'Telecommunications & Networks' },
+  { id: 'data_analytics', label: 'Data / Analytics', detail: 'Data Science, BI, Analytics' },
+  { id: 'product_management', label: 'Product Management', detail: 'Product Strategy & Delivery' },
+  { id: 'project_management', label: 'Project Management', detail: 'Program & Project Delivery' },
+  { id: 'customer_success', label: 'Customer Success / Support', detail: 'CS, Support, Account Management' },
+  { id: 'skilled_trades', label: 'Skilled Trades', detail: 'Electrical, Plumbing, Technical Trades' },
+  { id: 'entrepreneur', label: 'Entrepreneur / Founder', detail: 'Founders & Self-Employed' },
   { id: 'fresher', label: 'Fresher / Student', detail: 'Students, Graduates, Entry Level' },
+  { id: 'other', label: 'Other', detail: "Doesn't fit the categories above" },
 ]
 
 export type RoleLevel = 'entry' | 'junior' | 'mid' | 'senior' | 'lead'

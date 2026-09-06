@@ -36,10 +36,15 @@ function buildShareSvg(marketValue: number, score: number, topPercent: number, d
 export function ShareResult() {
   const { result, goBack, restart } = useApp()
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
-  if (!result) return null
+  if (!result || result.marketEvidence !== 'demo') return null
+  // Captured as locals rather than read off `result` inside the closures
+  // below: TypeScript's discriminated-union narrowing from the guard above
+  // doesn't persist into nested function bodies that capture the outer
+  // `result` variable, only into code in the same scope.
+  const { marketValueLPA, score, percentileTopPercent } = result
 
   const date = new Date(result.asOf).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-  const summary = buildShareSummary(result.marketValueLPA, result.score, result.percentileTopPercent, date)
+  const summary = buildShareSummary(marketValueLPA, score, percentileTopPercent, date)
 
   async function handleShare() {
     if (navigator.share) {
@@ -64,7 +69,7 @@ export function ShareResult() {
   }
 
   function handleDownload() {
-    const svg = buildShareSvg(result!.marketValueLPA, result!.score, result!.percentileTopPercent, date)
+    const svg = buildShareSvg(marketValueLPA, score, percentileTopPercent, date)
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

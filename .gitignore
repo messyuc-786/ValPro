@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Real env files (Supabase URL/anon key once a project exists) — only
+# .env.example, the checked-in placeholder template, is ever committed.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

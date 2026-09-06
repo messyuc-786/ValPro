@@ -79,6 +79,57 @@ describe('ValPro end-to-end flow', () => {
     expect(within(shareCard).getByText(/my market value/i)).toBeInTheDocument()
   }, 15000)
 
+  it('shows an honest insufficient-evidence result for a domain with no benchmark data, without ever letting skills/certifications/achievements block progress', async () => {
+    localStorage.clear()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getAllByRole('button', { name: /discover your market value/i })[0])
+    await user.click(screen.getByRole('button', { name: /working professional/i }))
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+
+    // Domain selection: pick a newly-added domain that has no calibrated
+    // benchmark — Legal is not one of the four demo-data domains.
+    expect(screen.getByRole('button', { name: /legal/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /legal/i }))
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+
+    // Education
+    await user.selectOptions(screen.getByLabelText(/highest qualification/i), "Bachelor's Degree")
+    await user.type(screen.getByLabelText(/institute \/ university/i), 'Delhi University')
+    await user.type(screen.getByLabelText(/marks \/ cgpa/i), '7.5')
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+
+    // Experience
+    await user.selectOptions(screen.getByLabelText(/total experience/i), '3-5')
+    await user.type(screen.getByLabelText(/current role/i), 'Legal Counsel')
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+
+    // Skills — NIL: add nothing, Next must not be blocked.
+    expect(screen.getByRole('button', { name: /^next/i })).toBeEnabled()
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+
+    // Certifications — NIL
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+    // Achievements — NIL
+    await user.click(screen.getByRole('button', { name: /^next/i }))
+
+    // Location
+    await user.selectOptions(screen.getByLabelText(/current location/i), 'Mumbai')
+    await user.click(screen.getByRole('button', { name: /analyze my value/i }))
+
+    expect(await screen.findByText(/analyzing your profile/i)).toBeInTheDocument()
+    expect(await screen.findByText(/insufficient data for legal/i, {}, { timeout: 5000 })).toBeInTheDocument()
+
+    // No fabricated number anywhere, and no path into Why/Gaps/What-If/Share.
+    expect(screen.queryByText(/lpa/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /view detailed analysis/i })).not.toBeInTheDocument()
+
+    // The offered actions are real, working navigation, not dead ends.
+    await user.click(screen.getByRole('button', { name: /change domain/i }))
+    expect(await screen.findByText(/choose your professional domain/i)).toBeInTheDocument()
+  }, 15000)
+
   it('supports going back from Your Role to Welcome', async () => {
     localStorage.clear()
     const user = userEvent.setup()

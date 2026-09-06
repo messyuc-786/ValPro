@@ -27,12 +27,16 @@ export interface ScenarioDefinition {
   }
 }
 
-export interface DomainPack {
-  id: DomainId
-  label: string
-  shortLabel: string
-  description: string
-
+/**
+ * The numeric calibration a domain needs before the engine can compute a
+ * value for it. Every field here is hand-authored demo data, not verified
+ * market research — see each domain pack file's own header comment and
+ * docs/VALPRO_CURRENT_BASELINE.md. A domain with no `DomainBenchmark`
+ * (see `DomainPack.benchmarkStatus` below) is not silently given fake
+ * numbers to fill this shape; it gets an honest "insufficient evidence"
+ * result instead (see valuationEngine.ts).
+ */
+export interface DomainBenchmark {
   /** Base annual value (LPA) for an entry-level profile in this domain, before multipliers. */
   baseValueLPA: number
   /** Value added per year of relevant experience, up to the cap. */
@@ -69,4 +73,22 @@ export interface DomainPack {
 
   /** Domain-specific phrasing for the "high demand" positive signal, kept out of the engine. */
   highDemandSkillLabel: string
+}
+
+export interface DomainPack {
+  id: DomainId
+  label: string
+  shortLabel: string
+  description: string
+
+  /**
+   * 'demo'          — `benchmark` is populated with a hand-authored, clearly
+   *                    demo-labeled calibration; the engine computes a value.
+   * 'insufficient'  — no calibration exists yet; `benchmark` is undefined and
+   *                    the engine returns an honest insufficient-evidence
+   *                    result instead of inventing one. The domain is still
+   *                    fully selectable — this only affects what Result shows.
+   */
+  benchmarkStatus: 'demo' | 'insufficient'
+  benchmark?: DomainBenchmark
 }

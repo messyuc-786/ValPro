@@ -142,6 +142,42 @@ than assumed.
   supplied, or (b) the user provides or licenses a real dataset for me to
   integrate.
 
+## Addendum — Phases 2-4 progress (this session, after user decisions)
+
+The user resolved the three open decisions above:
+
+1. **Domain expansion (Phase 3):** built the "insufficient market evidence"
+   architecture rather than extending fabricated data. `DomainPack` now has
+   a `benchmarkStatus: 'demo' | 'insufficient'` field; the 4 original
+   domains keep their existing (already-disclosed-as-demo) benchmark data
+   under a new `benchmark` sub-object, and 27 new domains (Healthcare,
+   Marketing, Legal, HR, etc. — the full list from the master prompt) are
+   now selectable with `benchmarkStatus: 'insufficient'`. `evaluateProfile()`
+   returns a discriminated-union `ValuationResult` — either the normal demo
+   result, or `{ marketEvidence: 'insufficient', domainId, asOf }` with no
+   numeric fields at all. `ResultOverview` shows an honest "Insufficient
+   data for {Domain}" screen for the latter, with real navigation
+   (Change Domain / Start Over) — no dead ends, no fabricated number.
+   Verified live: selecting "Legal" through a full onboarding walkthrough
+   correctly shows the insufficient-evidence screen with zero "LPA" text
+   anywhere on it; selecting "Technology" still produces a real number and
+   the full Why/Gaps/What-If/Share flow, unchanged.
+2. **Skills mandatory (Phase 2):** made optional — `Skills.tsx`'s Next
+   button is no longer disabled at zero skills, matching Certifications and
+   Achievements. Verified: an E2E test walks the full flow through Skills
+   with nothing added and reaches Result successfully.
+3. **Auth (Phase 4):** full architecture prepared without a live Supabase
+   project, per the user's explicit instruction not to invent credentials
+   or assume a cloud project exists. Not wired into the live app. See
+   `docs/VALPRO_AUTH_ARCHITECTURE.md` for the complete breakdown of what's
+   built, what's tested, and what genuinely cannot be verified without real
+   credentials.
+
+Tests: 50/50 (up from 35 at Phase 0 — 3 new engine/domain tests, 1 new E2E
+flow test, 11 new auth-scaffolding tests). Build and lint both clean (build
+bundle size unchanged after adding the auth scaffolding — confirms none of
+it is reachable from the live app yet, as intended).
+
 ## Recommendation
 
 Phase 0 is complete. Phases 1 (Welcome/design lock) and most of Phase 2

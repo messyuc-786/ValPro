@@ -9,9 +9,11 @@
  * later without changing any screen.
  *
  * The engine never claims to represent live market data — see honesty rules in
- * the product requirements doc.
+ * the product requirements doc. For a domain with no calibrated benchmark at
+ * all (DomainPack.benchmarkStatus === 'insufficient'), it does not fabricate
+ * one — evaluateProfile() returns an InsufficientEvidenceResult instead.
  */
-import type { DomainPack, ScenarioDefinition } from '../types/domain'
+import type { DomainBenchmark, DomainPack, ScenarioDefinition } from '../types/domain'
 import type {
   AchievementEntry,
   DomainId,
@@ -19,7 +21,7 @@ import type {
   RoleLevel,
 } from '../types/profile'
 import { experienceYears } from '../types/profile'
-import type { Confidence, ScenarioResult, Signal, ValueGap, ValuationResult } from '../types/valuation'
+import type { Confidence, DemoValuationResult, ScenarioResult, Signal, ValueGap, ValuationResult } from '../types/valuation'
 import { getDomainPack } from '../domains/registry'
 
 const ACHIEVEMENT_BASE_VALUE_LPA: Record<AchievementEntry['category'], number> = {
@@ -57,65 +59,65 @@ export function deriveRoleLevel(profile: Profile): RoleLevel {
   return level
 }
 
-function instituteTier(pack: DomainPack, institute: string): 'tier1' | 'tier2' | 'tier3' {
+function instituteTier(benchmark: DomainBenchmark, institute: string): 'tier1' | 'tier2' | 'tier3' {
   const value = normalize(institute)
   if (!value) return 'tier3'
-  if (pack.instituteTierKeywords.tier1.some((kw) => value.includes(kw))) return 'tier1'
-  if (pack.instituteTierKeywords.tier2.some((kw) => value.includes(kw))) return 'tier2'
+  if (benchmark.instituteTierKeywords.tier1.some((kw) => value.includes(kw))) return 'tier1'
+  if (benchmark.instituteTierKeywords.tier2.some((kw) => value.includes(kw))) return 'tier2'
   return 'tier3'
 }
 
-function locationMultiplier(pack: DomainPack, locationName: string): number {
+function locationMultiplier(benchmark: DomainBenchmark, locationName: string): number {
   const key = normalize(locationName)
-  return pack.locationMultipliers[key] ?? pack.defaultLocationMultiplier
+  return benchmark.locationMultipliers[key] ?? benchmark.defaultLocationMultiplier
 }
 
-function skillDemand(pack: DomainPack, skillName: string): number {
-  return pack.knownSkills[normalize(skillName)] ?? pack.defaultSkillDemand
+function skillDemand(benchmark: DomainBenchmark, skillName: string): number {
+  return benchmark.knownSkills[normalize(skillName)] ?? benchmark.defaultSkillDemand
 }
 
-function certificationValue(pack: DomainPack, certName: string): number {
-  return pack.knownCertifications[normalize(certName)] ?? pack.defaultCertificationValue
+function certificationValue(benchmark: DomainBenchmark, certName: string): number {
+  return benchmark.knownCertifications[normalize(certName)] ?? benchmark.defaultCertificationValue
 }
 
 /** Core deterministic calculation — no randomness, same profile always yields the same value. */
-function computeMarketValueLPA(profile: Profile, pack: DomainPack): number {
-  const years = Math.min(experienceYears(profile), pack.experienceCapYears)
+function computeMarketValueLPA(profile: Profile, benchmark: DomainBenchmark): number {
+  const years = Math.min(experienceYears(profile), benchmark.experienceCapYears)
   const roleLevel = deriveRoleLevel(profile)
 
-  let value = pack.baseValueLPA + years * pack.perYearExperienceLPA
-  value *= pack.roleLevelMultipliers[roleLevel]
+  let value = benchmark.baseValueLPA + years * benchmark.perYearExperienceLPA
+  value *= benchmark.roleLevelMultipliers[roleLevel]
 
-  const tier = instituteTier(pack, profile.education.institute)
-  value *= pack.instituteTierMultipliers[tier]
+  const tier = instituteTier(benchmark, profile.education.institute)
+  value *= benchmark.instituteTierMultipliers[tier]
 
   const targetLocation = profile.location.targetCity || profile.location.current
-  value *= locationMultiplier(pack, targetLocation)
+  value *= locationMultiplier(benchmark, targetLocation)
 
   const marks = typeof profile.education.marks === 'number' ? profile.education.marks : 0
-  const educationBonus = Math.max(0, marks - 6.5) * 0.28 * (pack.weights.education / 0.15)
+  const educationBonus = Math.max(0, marks - 6.5) * 0.28 * (benchmark.weights.education / 0.15)
   value += educationBonus
 
   const skillsBonus = profile.skills.reduce(
-    (sum, s) => sum + skillDemand(pack, s.name) * (s.proficiency / 100),
+    (sum, s) => sum + skillDemand(benchmark, s.name) * (s.proficiency / 100),
     0,
-  ) * (pack.weights.skills / 0.18)
+  ) * (benchmark.weights.skills / 0.18)
   value += skillsBonus
 
   const certsBonus = profile.certifications.reduce(
-    (sum, c) => sum + certificationValue(pack, c.name),
+    (sum, c) => sum + certificationValue(benchmark, c.name),
     0,
-  ) * (pack.weights.certifications / 0.15)
+  ) * (benchmark.weights.certifications / 0.15)
   value += certsBonus
 
   const achievementsBonus = profile.achievements.reduce(
     (sum, a) => sum + ACHIEVEMENT_BASE_VALUE_LPA[a.category],
     0,
-  ) * (pack.weights.achievements / 0.14)
+  ) * (benchmark.weights.achievements / 0.14)
   value += achievementsBonus
 
   if (profile.experience.hasLeadershipExperience) {
-    value += 0.4 * (pack.weights.experience / 0.28)
+    value += 0.4 * (benchmark.weights.experience / 0.28)
   }
 
   return Math.max(2.0, value)
@@ -139,7 +141,7 @@ function confidenceFromCompleteness(ratio: number): Confidence {
   return 'Low'
 }
 
-function positiveSignals(profile: Profile, pack: DomainPack): Signal[] {
+function positiveSignals(profile: Profile, pack: DomainPack, benchmark: DomainBenchmark): Signal[] {
   const signals: Signal[] = []
   const marks = typeof profile.education.marks === 'number' ? profile.education.marks : 0
 
@@ -153,7 +155,7 @@ function positiveSignals(profile: Profile, pack: DomainPack): Signal[] {
     signals.push({ id: 'academics', label: 'Strong academic background' })
   }
 
-  const tier = instituteTier(pack, profile.education.institute)
+  const tier = instituteTier(benchmark, profile.education.institute)
   if (tier === 'tier1') {
     signals.push({ id: 'institute', label: 'Recognised, high-tier institute' })
   }
@@ -162,15 +164,16 @@ function positiveSignals(profile: Profile, pack: DomainPack): Signal[] {
     signals.push({ id: 'industry_experience', label: 'Relevant industry experience' })
   }
 
-  const hasHighDemandSkill = profile.skills.some((s) => skillDemand(pack, s.name) >= 1.1)
+  const hasHighDemandSkill = profile.skills.some((s) => skillDemand(benchmark, s.name) >= 1.1)
   if (hasHighDemandSkill) {
-    signals.push({ id: 'demand', label: pack.highDemandSkillLabel })
+    signals.push({ id: 'demand', label: benchmark.highDemandSkillLabel })
   }
 
   if (profile.experience.hasLeadershipExperience) {
     signals.push({ id: 'leadership', label: 'Demonstrated leadership experience' })
   }
 
+  void pack
   return signals
 }
 
@@ -240,7 +243,7 @@ export function applyScenario(profile: Profile, scenario: ScenarioDefinition): P
   }
 }
 
-function buildValueGaps(profile: Profile, pack: DomainPack, currentValue: number): ValueGap[] {
+function buildValueGaps(profile: Profile, pack: DomainPack, benchmark: DomainBenchmark, currentValue: number): ValueGap[] {
   const candidates: { id: string; label: string; detail: string; scenario: ScenarioDefinition }[] = []
 
   if (!profile.experience.hasLeadershipExperience) {
@@ -272,7 +275,7 @@ function buildValueGaps(profile: Profile, pack: DomainPack, currentValue: number
   }
 
   if (profile.certifications.length === 0) {
-    const [firstCert] = Object.keys(pack.knownCertifications)
+    const [firstCert] = Object.keys(benchmark.knownCertifications)
     candidates.push({
       id: 'gap_cert',
       label: 'Certification Coverage',
@@ -284,7 +287,7 @@ function buildValueGaps(profile: Profile, pack: DomainPack, currentValue: number
   return candidates
     .map((c) => {
       const scenarioProfile = applyScenario(profile, c.scenario)
-      const scenarioValue = computeMarketValueLPA(scenarioProfile, pack)
+      const scenarioValue = computeMarketValueLPA(scenarioProfile, benchmark)
       const delta = Math.max(0.1, scenarioValue - currentValue)
       return {
         id: c.id,
@@ -298,10 +301,10 @@ function buildValueGaps(profile: Profile, pack: DomainPack, currentValue: number
     .slice(0, 3)
 }
 
-function buildScenarioResults(profile: Profile, pack: DomainPack, currentValue: number): ScenarioResult[] {
-  return pack.scenarioCatalog.map((scenario) => {
+function buildScenarioResults(profile: Profile, benchmark: DomainBenchmark, currentValue: number): ScenarioResult[] {
+  return benchmark.scenarioCatalog.map((scenario) => {
     const scenarioProfile = applyScenario(profile, scenario)
-    const scenarioValue = Math.round(computeMarketValueLPA(scenarioProfile, pack) * 10) / 10
+    const scenarioValue = Math.round(computeMarketValueLPA(scenarioProfile, benchmark) * 10) / 10
     return {
       id: scenario.id,
       label: scenario.label,
@@ -325,8 +328,14 @@ function nextMovesFromGaps(gaps: ValueGap[]): string[] {
 export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): ValuationResult {
   const domainId = domainIdOverride ?? profile.domain ?? 'technology'
   const pack = getDomainPack(domainId)
+  const asOf = new Date().toISOString().slice(0, 10)
 
-  const marketValue = computeMarketValueLPA(profile, pack)
+  if (pack.benchmarkStatus === 'insufficient' || !pack.benchmark) {
+    return { domainId, asOf, marketEvidence: 'insufficient' }
+  }
+  const benchmark = pack.benchmark
+
+  const marketValue = computeMarketValueLPA(profile, benchmark)
   const ratio = completeness(profile)
   const confidence = confidenceFromCompleteness(ratio)
 
@@ -334,16 +343,17 @@ export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): 
   const lowerRange = Math.max(1.8, marketValue * (1 - spreadFactor))
   const upperRange = marketValue * (1 + spreadFactor * 1.2)
 
-  const gaps = buildValueGaps(profile, pack, marketValue)
+  const gaps = buildValueGaps(profile, pack, benchmark, marketValue)
   const potentialValue = marketValue + gaps.reduce((sum, g) => sum + g.impactHighLPA, 0) * 0.6
 
-  const normalizedPosition = (marketValue - pack.baseValueLPA) / pack.benchmarkSpreadLPA
+  const normalizedPosition = (marketValue - benchmark.baseValueLPA) / benchmark.benchmarkSpreadLPA
   const score = Math.round(Math.min(98, Math.max(8, 40 + normalizedPosition * 100)))
   const percentileTopPercent = Math.round(Math.min(95, Math.max(2, 100 - score)))
 
-  return {
+  const result: DemoValuationResult = {
     domainId,
-    asOf: new Date().toISOString().slice(0, 10),
+    asOf,
+    marketEvidence: 'demo',
     marketValueLPA: Math.round(marketValue * 10) / 10,
     lowerRangeLPA: Math.round(lowerRange * 10) / 10,
     upperRangeLPA: Math.round(upperRange * 10) / 10,
@@ -351,10 +361,11 @@ export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): 
     score,
     percentileTopPercent,
     confidence,
-    positiveSignals: positiveSignals(profile, pack),
+    positiveSignals: positiveSignals(profile, pack, benchmark),
     improvementSignals: improvementSignals(profile, pack),
     valueGaps: gaps,
-    scenarios: buildScenarioResults(profile, pack, marketValue),
+    scenarios: buildScenarioResults(profile, benchmark, marketValue),
     nextMoves: nextMovesFromGaps(gaps),
   }
+  return result
 }

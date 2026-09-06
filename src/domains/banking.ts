@@ -10,7 +10,9 @@ export const bankingPack: DomainPack = {
   label: 'Banking & Finance',
   shortLabel: 'Banking',
   description: 'Banking, Investment, FinTech, and related roles.',
+  benchmarkStatus: 'demo',
 
+  benchmark: {
   baseValueLPA: 5.8,
   perYearExperienceLPA: 1.15,
   experienceCapYears: 18,
@@ -75,4 +77,5 @@ export const bankingPack: DomainPack = {
   ],
 
   highDemandSkillLabel: 'High demand for your skill set',
+  },
 }

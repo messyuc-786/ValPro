@@ -20,12 +20,16 @@ export function Skills() {
     setAdding(false)
   }
 
+  // Skills, like certifications and achievements, is optional — a user with
+  // none yet is never blocked. Zero skills does lower the valuation's
+  // completeness score / confidence, which the engine already handles (see
+  // completeness() in valuationEngine.ts).
   return (
     <ScreenShell
       screen="skills"
       onBack={goBack}
       footer={
-        <Button className="w-full" disabled={profile.skills.length === 0} onClick={goNext}>
+        <Button className="w-full" onClick={goNext}>
           Next →
         </Button>
       }

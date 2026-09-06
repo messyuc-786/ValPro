@@ -11,7 +11,9 @@ export const fresherPack: DomainPack = {
   label: 'Fresher / Student',
   shortLabel: 'Fresher',
   description: 'Students, graduates, and entry-level candidates.',
+  benchmarkStatus: 'demo',
 
+  benchmark: {
   baseValueLPA: 3.2,
   perYearExperienceLPA: 0.9,
   experienceCapYears: 2,
@@ -73,4 +75,5 @@ export const fresherPack: DomainPack = {
   ],
 
   highDemandSkillLabel: 'High demand for your skill set among entry-level hiring',
+  },
 }

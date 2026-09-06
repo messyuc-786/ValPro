@@ -8,7 +8,7 @@ import { backdropFor } from '../navigation/flow'
 
 export function ImprovementAreas() {
   const { result, goTo, goBack } = useApp()
-  if (!result) return null
+  if (!result || result.marketEvidence !== 'demo') return null
 
   return (
     <Backdrop image={backdropFor('gaps')}>

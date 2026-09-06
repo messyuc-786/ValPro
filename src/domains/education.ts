@@ -11,7 +11,9 @@ export const educationPack: DomainPack = {
   label: 'Education',
   shortLabel: 'Education',
   description: 'Teaching, Academics, and Administration roles.',
+  benchmarkStatus: 'demo',
 
+  benchmark: {
   baseValueLPA: 3.6,
   perYearExperienceLPA: 0.5,
   experienceCapYears: 25,
@@ -73,4 +75,5 @@ export const educationPack: DomainPack = {
   ],
 
   highDemandSkillLabel: 'High demand for your teaching specialization',
+  },
 }
