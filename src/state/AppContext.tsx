@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createEmptyProfile } from '../types/profile'
 import type { Profile } from '../types/profile'
@@ -65,7 +65,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // Persist on every profile change (best-effort; see persistence.ts).
-  useMemo(() => {
+  // useEffect, not useMemo — this is a side effect, and useMemo carries no
+  // guarantee a memoized callback runs on every commit in future React
+  // versions (it happened to work here, but that was luck, not a contract).
+  useEffect(() => {
     saveProfile(profile)
   }, [profile])
 
