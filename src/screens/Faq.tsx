@@ -13,7 +13,7 @@ import { backdropFor } from '../navigation/flow'
 const FAQ_ITEMS: { q: string; a: string }[] = [
   { q: 'What is ValPro?', a: 'A tool that estimates your current professional market value from your real profile — education, experience, skills and more — and explains why, rather than just asking your current salary.' },
   { q: 'Is it a salary calculator?', a: 'No. A salary calculator reflects what you already earn. ValPro estimates what the market would value you at today, which can be higher, lower, or the same as your current pay.' },
-  { q: 'Does it guarantee a salary or offer?', a: 'No. Every result is a modeled estimate with a stated confidence level — indicative, not a promise of compensation from any employer.' },
+  { q: 'Does it guarantee a salary or offer?', a: 'No. Every result is a modeled estimate with a stated evidence strength — indicative, not a promise of compensation from any employer, and not a statistically validated market statistic.' },
   { q: 'How is market value determined?', a: 'Your profile signals are weighted against a domain-specific benchmark model — see How It Works for the exact steps and factors.' },
   { q: 'What happens if there isn’t enough data for my domain?', a: 'ValPro says so directly — "Insufficient Market Evidence" — instead of showing a number it can’t stand behind. Your profile is saved for when real data is added.' },
   { q: 'Are certifications mandatory?', a: 'No. Certifications are optional and never block you from getting a result.' },

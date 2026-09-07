@@ -1,6 +1,6 @@
 import { useApp } from '../state/AppContext'
 import { Button } from '../ui/Button'
-import { ConfidenceBadge, StatRow, StatTile } from '../ui/resultDisplay'
+import { ConfidenceBadge, MarketEvidenceBadge, StatRow, StatTile } from '../ui/resultDisplay'
 import { IconArrowRight } from '../ui/icons'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
@@ -94,14 +94,14 @@ export function ResultOverview() {
 
         <div className="mt-6">
           <StatRow>
-            <StatTile label="Market Score" value={`${result.score}/100`} />
-            <StatTile label="Market Position" value={`Top ${result.percentileTopPercent}%`} />
-            <StatTile label="Confidence" value={<ConfidenceBadge confidence={result.confidence} />} />
+            <StatTile label="Profile Strength Score" value={`${result.score}/100`} />
+            <StatTile label="Market Evidence" value={<MarketEvidenceBadge marketEvidence={result.marketEvidence} />} />
+            <StatTile label="Evidence Strength" value={<ConfidenceBadge confidence={result.confidence} />} />
           </StatRow>
         </div>
 
         <p className="mt-6 text-[11.5px] leading-relaxed text-[var(--color-muted)]">
-          Estimated and modeled from your profile signals — indicative, not a guaranteed salary or offer.
+          Estimated and modeled from your profile signals against a development-stage benchmark — indicative, not a guaranteed salary, offer, or verified market statistic.
         </p>
       </div>
 

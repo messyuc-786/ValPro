@@ -117,32 +117,37 @@ npm run build     →  succeeds — tsc -b && vite build, 107 modules, dist/ pro
 
 122/122 tests pass. No test was deleted or weakened to make the suite pass.
 
+*(This count reflects the currency fix itself. The post-fix integrity cleanup in Section 11 added 2 more tests — see `docs/VALPRO_POST_FIX_CLEANUP_REPORT.md` for the updated 124/124 result.)*
+
 ---
 
 ## 8. Live Verification
 
-**Blocked — and this is the most important actionable finding in this report.**
+**LIVE VERIFICATION: PASSED.**
 
-The live deployment (`https://messyuc-786.github.io/ValPro/`) currently returns **"Site not found · GitHub Pages"**. Cross-checked two independent ways:
-- Direct HTTPS request from this environment: `404`.
-- The GitHub REST API for the repository itself (`api.github.com/repos/messyuc-786/ValPro`): `404` (not `403`) to an unauthenticated request.
-- Confirmed again via a real browser (Browser pane, genuine internet access, not this sandbox) loading the exact Pages URL: identical "Site not found" result.
+Confirmed, in this order, against the real deployed app — not localhost:
+- GitHub repository (`messyuc-786/ValPro`) is **Public**.
+- GitHub Pages is **enabled** for the repo.
+- `https://messyuc-786.github.io/ValPro/` returns **HTTP 200**.
+- A full live assessment flow was completed end to end on that URL.
+- INR currency formatting (`₹`/`LPA`) works correctly, with no `$` anywhere.
+- **Result** screen verified live.
+- **Value Gaps** screen verified live.
+- **What-If** screen verified live.
+- **Share Result** screen verified live.
 
-A `404` (rather than `403`) from GitHub's API to an unauthenticated request is the specific signature of a **repository that has been switched to Private** — GitHub's Pages free tier does not serve Pages sites for private repositories, and the API itself refuses to even confirm the repo exists to a logged-out caller.
+<details>
+<summary>Earlier investigation — resolved (click to expand the original trail)</summary>
 
-The fix was committed, pushed to `main`, and `npm run deploy` (build + `gh-pages -d dist`) completed successfully — the built assets carrying this fix are on the `gh-pages` branch. Reloading the live URL immediately after still returned the identical "Site not found," confirming the deploy itself was not the blocker.
+The live deployment initially returned "Site not found · GitHub Pages" (`404`, both via direct HTTPS request and the GitHub REST API for the repo itself, and confirmed with a real browser). A `404` — rather than `403` — from GitHub's API to an unauthenticated request is the signature of a private repository, which breaks Pages on the free tier.
 
-**Update — resolved.** Two account-side settings were needed, found and fixed in sequence: (1) the repository was Private (returned 404 to unauthenticated API requests) — the user switched it to Public; (2) even after that, `api.github.com/repos/messyuc-786/ValPro/pages` still returned 404, meaning **GitHub Pages had never been enabled** for the repo (a `gh-pages` branch existing doesn't turn Pages on by itself) — the user enabled it via Settings → Pages → Deploy from a branch → `gh-pages` / root. After both fixes, the site returned `200` and I completed a full live, end-to-end walkthrough:
+Two account-side settings turned out to be needed, found and fixed in sequence:
+1. The repository was Private → the user switched it to Public.
+2. Even after that, `api.github.com/repos/messyuc-786/ValPro/pages` still returned `404`, meaning GitHub Pages had never actually been *enabled* for the repo (a `gh-pages` branch existing doesn't turn Pages on by itself) → the user enabled it via Settings → Pages → Deploy from a branch → `gh-pages` / root.
 
-- Cleared `localStorage` first (a prior manual test had left a stale "Telecom" domain selection cached, which surfaced correctly as an honest `insufficient` result — not a bug, just stale local state) and ran the assessment fresh: Working Professional → Technology / IT → IIT-Bombay-equivalent education → 8-12 yrs experience, no skills/certs/achievements added → Bangalore/Bangalore location.
-- **Result screen (live):** `₹46.2 LPA`, range `₹36.0L–₹58.4L`, Market Score 98/100, Top 2%, Confidence Medium — screenshot captured, no `$` anywhere.
-- **Value Gaps screen (live):** `Potential Impact +₹27.2L–₹48.9L` etc. — `GapCard`'s new currency-aware formatting confirmed working.
-- **What If? screen (live):** `₹46.2L → ₹47.7L +₹1.5L` etc. — `ScenarioRow`'s new currency-aware formatting confirmed working.
-- **Share Result screen (live):** share card renders `₹46.2 LPA` — screenshot captured — confirming `ShareResult.tsx`'s threaded `currency` prop renders correctly on the actual deployed build, not just in tests.
+After both fixes, the site returned `200` and a full live walkthrough was completed: `localStorage` was cleared first (a prior manual test had left a stale "Telecom" domain selection cached, which correctly surfaced as an honest `insufficient` result — not a bug), then the assessment was run fresh (Working Professional → Technology / IT → IIT-Bombay-equivalent education → 8-12 yrs experience, no skills/certs/achievements → Bangalore/Bangalore). Every screen (Result, Value Gaps, What-If, Share Result) rendered `₹`/`LPA` currency correctly with no `$`. This trail predates the Section 11 terminology cleanup below — the values captured then (e.g. "Market Score 98/100", "Top 2%") reflect the labels in place *at that time*; the labels themselves were subsequently corrected (see Section 11), and live verification was re-run afterward to confirm the corrected labels also render correctly on the deployed site.
 
-**Live verification is complete and passed.** This is not a localhost claim — every screen above was exercised against `https://messyuc-786.github.io/ValPro/` directly.
-
-**Action needed from you:** in GitHub → `messyuc-786/ValPro` → Settings → General → Danger Zone, change repository visibility back to **Public** (or upgrade to a plan that serves Pages from private repos). Once that's done, live verification can actually happen — until then, no one (not just this environment) can reach the deployed app.
+</details>
 
 ---
 
@@ -163,3 +168,17 @@ This directly satisfies scenario A of the requested test matrix and rules out Su
 - All four benchmarks (technology, banking, education, fresher) are **development fixtures** (`dataSource: 'development_fixture'`), not verified market data. `marketEvidence` on their results is `'partial'`, and the UI's evidence badge reflects this — no domain claims `'supported'` today (see `docs/VALPRO_CURRENT_BASELINE.md` and `docs/VALPRO_PHASE_3_REPORT.md` for prior disclosure of this).
 - `profile.location.targetMarket` is collected but not used by the engine (Section 2) — a user who states a non-India target market receives an India-benchmarked result with no disclosure that the market they named isn't covered. This is a real, open gap; fixing it responsibly requires either (a) validating `targetMarket` against a closed list of supported markets at input time, or (b) adding an explicit "we don't have data for this market" evidence state — both are product/data decisions beyond the scope of "fix the currency/value bug," and are flagged here rather than patched with a guess.
 - `CurrencyCode` currently supports only `'INR'`. The architecture (per-currency maps in `currency.ts`, the `currency` field threaded through `DomainBenchmark` → `EvaluatedValuationResult` → every render site) is ready for `'USD' | 'GBP' | 'AED' | 'SGD'`, etc., the moment any of those markets has real, sourced benchmark data — no code restructuring will be needed, only new map entries plus the underlying data.
+
+---
+
+## 11. Post-Fix Integrity Cleanup
+
+A follow-up audit, after this fix was live-verified, found two remaining issues: this report had accumulated stale/contradictory status language as the live-verification blocker was resolved (fixed in Section 8 above), and the Result/Share screens were presenting fixture-derived numbers with language that reads as validated market statistics. Full detail — including the market-claim audit, exact terminology decisions, and a second live-verification pass — is in the dedicated **`docs/VALPRO_POST_FIX_CLEANUP_REPORT.md`**. Summary:
+
+- **"Market Score" → "Profile Strength Score"** — this number is a deterministic function of the profile/engine, not a statistically validated market score; the label now says what it actually is.
+- **"Market Position: Top X%" → removed entirely**, everywhere it appeared (Result screen, Share Result screen and card, the downloadable SVG, and the copied text summary) — not replaced with a different percentage or a softer ranking claim. It was a bare re-expression of the same fixture-derived score (`100 - score`), not a real population percentile.
+- **"Confidence" → "Evidence Strength"** — this value reflects profile completeness (how much evidence backs the estimate), not statistical confidence. Same Low/Medium/High values, honest label.
+- **New: a "Market Evidence" indicator** (Result screen and Share Result) showing the result's actual `marketEvidence` value ("Partial" for every domain today) — using the existing evidence field, inventing nothing.
+- The evidence-tier architecture (`supported`/`partial`/`insufficient`) and the honest insufficient-evidence path are unchanged.
+- `profile.location.targetMarket` remains a documented, unfixed limitation — still no string-matching heuristic was added.
+- The valuation formula, What-If calculations, and currency architecture from this report are **unchanged**.

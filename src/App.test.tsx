@@ -64,6 +64,18 @@ describe('ValPro end-to-end flow', () => {
     expect(await screen.findByText(/your market value/i, {}, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.getByText(/estimated range/i)).toBeInTheDocument()
 
+    // Post-fix integrity: the Result screen must never present the current
+    // development-fixture benchmark as a validated population percentile —
+    // no "Top X%" claim anywhere — and must use honest, non-statistical
+    // labels for the profile/engine-derived score and evidence quality.
+    expect(screen.queryByText(/top \d+%/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/profile strength score/i)).toBeInTheDocument()
+    expect(screen.getByText(/^market evidence$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^partial$/i)).toBeInTheDocument()
+    expect(screen.getByText(/evidence strength/i)).toBeInTheDocument()
+    expect(screen.getByText(/development-stage benchmark/i)).toBeInTheDocument()
+    expect(screen.getByText(/not a guaranteed salary, offer, or verified market statistic/i)).toBeInTheDocument()
+
     // Navigate onward through Why / Gaps / What-If / Share.
     await user.click(screen.getByRole('button', { name: /view detailed analysis/i }))
     expect(await screen.findByText(/why this value/i)).toBeInTheDocument()
@@ -77,6 +89,14 @@ describe('ValPro end-to-end flow', () => {
     await user.click(screen.getByRole('button', { name: /share result/i }))
     const shareCard = await screen.findByTestId('share-card')
     expect(within(shareCard).getByText(/my market value/i)).toBeInTheDocument()
+    // The share card is a user-facing export (downloadable image / copied
+    // text) and must carry the same honest labels as the on-screen result —
+    // no percentile claim, "Profile Strength" instead of "Market Score",
+    // and the actual evidence tier instead of an implied ranking.
+    expect(within(shareCard).queryByText(/top \d+%/i)).not.toBeInTheDocument()
+    expect(within(shareCard).getByText(/profile strength/i)).toBeInTheDocument()
+    expect(within(shareCard).getByText(/market evidence/i)).toBeInTheDocument()
+    expect(within(shareCard).getByText(/^partial$/i)).toBeInTheDocument()
   }, 15000)
 
   it('shows an honest insufficient-evidence result for a domain with no benchmark data, without ever letting skills/certifications/achievements block progress', async () => {

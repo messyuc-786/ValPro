@@ -7,28 +7,37 @@ import { Wordmark } from '../ui/Logo'
 import { backdropFor } from '../navigation/flow'
 import { formatCurrencyAmount } from '../types/currency'
 import type { CurrencyCode } from '../types/currency'
+import type { EvidenceStatus } from '../types/domain'
 
-function buildShareSummary(marketValue: number, currency: CurrencyCode, score: number, topPercent: number, date: string): string {
+/** 'Partial' for every domain today (development-fixture benchmarks) —
+ * 'Supported' is rendered the moment a domain's data is real, with no code
+ * change needed elsewhere. Never invents a value beyond what
+ * `EvaluatedValuationResult.marketEvidence` already carries. */
+function evidenceLabel(marketEvidence: Extract<EvidenceStatus, 'supported' | 'partial'>): string {
+  return marketEvidence === 'supported' ? 'Supported' : 'Partial'
+}
+
+function buildShareSummary(marketValue: number, currency: CurrencyCode, score: number, marketEvidence: Extract<EvidenceStatus, 'supported' | 'partial'>, date: string): string {
   return [
     'VALPRO',
     'My Market Value',
     formatCurrencyAmount(marketValue, currency),
-    `Market Score ${score}/100`,
-    `Top ${topPercent}%`,
+    `Profile Strength ${score}/100`,
+    `Market Evidence: ${evidenceLabel(marketEvidence)}`,
     date,
     'Know Your Market Value.',
   ].join('\n')
 }
 
-function buildShareSvg(marketValue: number, currency: CurrencyCode, score: number, topPercent: number, date: string): string {
+function buildShareSvg(marketValue: number, currency: CurrencyCode, score: number, marketEvidence: Extract<EvidenceStatus, 'supported' | 'partial'>, date: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="760" viewBox="0 0 600 760">
     <rect width="600" height="760" fill="#121210"/>
     <rect x="40" y="40" width="520" height="680" rx="8" fill="#faf9f5"/>
     <text x="80" y="110" font-family="Georgia, serif" font-size="26" font-weight="600" fill="#111111">ValPro</text>
     <text x="80" y="160" font-family="Arial, sans-serif" font-size="13" letter-spacing="2" fill="#77736b">MY MARKET VALUE</text>
     <text x="80" y="230" font-family="Georgia, serif" font-size="56" font-weight="600" fill="#111111">${formatCurrencyAmount(marketValue, currency)}</text>
-    <text x="80" y="300" font-family="Arial, sans-serif" font-size="15" fill="#111111">Market Score ${score}/100</text>
-    <text x="80" y="330" font-family="Arial, sans-serif" font-size="15" fill="#4f8bd1">Top ${topPercent}%</text>
+    <text x="80" y="300" font-family="Arial, sans-serif" font-size="15" fill="#111111">Profile Strength ${score}/100</text>
+    <text x="80" y="330" font-family="Arial, sans-serif" font-size="15" fill="#4f8bd1">Market Evidence: ${evidenceLabel(marketEvidence)}</text>
     <text x="80" y="620" font-family="Arial, sans-serif" font-size="12" fill="#77736b">${date}</text>
     <text x="80" y="660" font-family="Georgia, serif" font-style="italic" font-size="16" fill="#111111">Know Your Market Value.</text>
     <text x="80" y="695" font-family="Arial, sans-serif" font-size="11" letter-spacing="1.5" fill="#9a9186">BHASAD.ORG</text>
@@ -43,10 +52,10 @@ export function ShareResult() {
   // below: TypeScript's discriminated-union narrowing from the guard above
   // doesn't persist into nested function bodies that capture the outer
   // `result` variable, only into code in the same scope.
-  const { marketValueLPA, currency, score, percentileTopPercent } = result
+  const { marketValueLPA, currency, score, marketEvidence } = result
 
   const date = new Date(result.asOf).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-  const summary = buildShareSummary(marketValueLPA, currency, score, percentileTopPercent, date)
+  const summary = buildShareSummary(marketValueLPA, currency, score, marketEvidence, date)
 
   async function handleShare() {
     if (navigator.share) {
@@ -71,7 +80,7 @@ export function ShareResult() {
   }
 
   function handleDownload() {
-    const svg = buildShareSvg(marketValueLPA, currency, score, percentileTopPercent, date)
+    const svg = buildShareSvg(marketValueLPA, currency, score, marketEvidence, date)
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -96,12 +105,12 @@ export function ShareResult() {
           <p className="mt-1 font-display text-[32px] font-semibold tabular">{formatCurrencyAmount(result.marketValueLPA, currency)}</p>
           <div className="mt-4 flex items-center justify-between">
             <div>
-              <p className="text-[11px] text-[var(--color-muted)]">Market Score</p>
+              <p className="text-[11px] text-[var(--color-muted)]">Profile Strength</p>
               <p className="font-mono text-[14px] font-semibold tabular">{result.score} / 100</p>
             </div>
             <div className="text-right">
-              <p className="text-[11px] text-[var(--color-muted)]">&nbsp;</p>
-              <p className="font-mono text-[14px] font-semibold text-[var(--color-accent-blue)] tabular">Top {result.percentileTopPercent}%</p>
+              <p className="text-[11px] text-[var(--color-muted)]">Market Evidence</p>
+              <p className="font-mono text-[14px] font-semibold text-[var(--color-accent-blue)] tabular">{evidenceLabel(marketEvidence)}</p>
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between border-t border-[var(--color-line)] pt-3">

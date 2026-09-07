@@ -50,8 +50,15 @@ export interface EvaluatedValuationResult extends ValuationResultCommon {
   upperRangeLPA: number
   potentialValueLPA: number
 
-  score: number // 0-100
-  percentileTopPercent: number // "Top X%" — lower is better
+  score: number // 0-100 — a deterministic profile/engine score, not a statistically validated market percentile. Rendered as "Profile Strength Score", never "Market Score" — see docs/VALPRO_POST_FIX_CLEANUP_REPORT.md.
+  /** "Top X%" — lower is better. Computed from the same fixture-derived
+   * `score` above, so it is NOT a real population-level market ranking.
+   * Deliberately kept computed here (for any future internal/analytics use)
+   * but must NOT be rendered anywhere in the UI or in any exported/shared
+   * copy until a domain's benchmark is backed by real market data — see
+   * docs/VALPRO_POST_FIX_CLEANUP_REPORT.md for the audit that removed it
+   * from every render site. */
+  percentileTopPercent: number
   confidence: Confidence
 
   positiveSignals: Signal[]

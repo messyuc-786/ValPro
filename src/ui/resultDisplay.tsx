@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { IconMinusCircle, IconPlusCircle } from './icons'
 import type { Confidence } from '../types/valuation'
+import type { EvidenceStatus } from '../types/domain'
 import { formatCurrencyCompact, type CurrencyCode } from '../types/currency'
 
 export function StatTile({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
@@ -17,9 +18,26 @@ export function StatRow({ children }: { children: ReactNode }) {
   return <div className="flex rounded-[3px] border border-[var(--color-line)] bg-[var(--color-surface)]">{children}</div>
 }
 
+/** Despite the name (kept to avoid a wider rename churn), this shows
+ * evidence STRENGTH — how much of the profile backs the estimate — never
+ * statistical confidence. Callers should label it "Evidence Strength", not
+ * "Confidence", in any user-facing copy. See
+ * docs/VALPRO_POST_FIX_CLEANUP_REPORT.md. */
 export function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   const tone = confidence === 'High' ? 'text-[var(--color-positive)]' : confidence === 'Medium' ? 'text-[var(--color-accent)]' : 'text-[var(--color-negative)]'
   return <span className={`font-mono text-[18px] font-semibold ${tone}`}>{confidence}</span>
+}
+
+/** Surfaces the domain benchmark's actual evidence tier (never
+ * 'insufficient' here — that branch never reaches a rendered result) so the
+ * UI discloses that a result comes from a development-fixture calibration
+ * ('Partial') rather than implying every number is backed by verified
+ * live market data. No new evidence values are invented — this just
+ * displays the existing `EvaluatedValuationResult.marketEvidence` field. */
+export function MarketEvidenceBadge({ marketEvidence }: { marketEvidence: Extract<EvidenceStatus, 'supported' | 'partial'> }) {
+  const tone = marketEvidence === 'supported' ? 'text-[var(--color-positive)]' : 'text-[var(--color-accent)]'
+  const label = marketEvidence === 'supported' ? 'Supported' : 'Partial'
+  return <span className={`font-mono text-[18px] font-semibold ${tone}`}>{label}</span>
 }
 
 export function SignalRow({ label, positive }: { label: string; positive: boolean }) {
