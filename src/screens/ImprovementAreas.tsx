@@ -22,7 +22,7 @@ export function ImprovementAreas() {
             <p className="text-[13.5px] text-[var(--color-muted)]">No significant gaps detected in your current profile.</p>
           ) : (
             result.valueGaps.map((gap, i) => (
-              <GapCard key={gap.id} rank={i + 1} label={gap.label} detail={gap.detail} impactLow={gap.impactLowLPA} impactHigh={gap.impactHighLPA} />
+              <GapCard key={gap.id} rank={i + 1} label={gap.label} detail={gap.detail} impactLow={gap.impactLowLPA} impactHigh={gap.impactHighLPA} currency={result.currency} />
             ))
           )}
         </div>

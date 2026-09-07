@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { IconMinusCircle, IconPlusCircle } from './icons'
 import type { Confidence } from '../types/valuation'
+import { formatCurrencyCompact, type CurrencyCode } from '../types/currency'
 
 export function StatTile({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
   return (
@@ -38,12 +39,14 @@ export function GapCard({
   detail,
   impactLow,
   impactHigh,
+  currency,
 }: {
   rank: number
   label: string
   detail: string
   impactLow: number
   impactHigh: number
+  currency: CurrencyCode
 }) {
   return (
     <div className="flex gap-3.5 rounded-[3px] border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-4">
@@ -52,7 +55,7 @@ export function GapCard({
         <span className="text-[15px] font-semibold text-[var(--color-text)]">{label}</span>
         <span className="text-[12.5px] leading-snug text-[var(--color-muted)]">{detail}</span>
         <span className="mt-1.5 font-mono text-[13px] font-semibold text-[var(--color-positive)] tabular">
-          Potential Impact +₹{impactLow.toFixed(1)}L–₹{impactHigh.toFixed(1)}L
+          Potential Impact +{formatCurrencyCompact(impactLow, currency)}–{formatCurrencyCompact(impactHigh, currency)}
         </span>
       </div>
     </div>
@@ -64,23 +67,25 @@ export function ScenarioRow({
   currentValue,
   scenarioValue,
   delta,
+  currency,
 }: {
   label: string
   currentValue: number
   scenarioValue: number
   delta: number
+  currency: CurrencyCode
 }) {
   const positive = delta >= 0
   return (
     <div className="flex flex-col gap-2 rounded-[3px] border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3.5">
       <span className="text-[14.5px] font-semibold text-[var(--color-text)]">{label}</span>
       <div className="flex items-center gap-2 font-mono text-[13px] tabular">
-        <span className="text-[var(--color-muted)]">₹{currentValue.toFixed(1)}L</span>
+        <span className="text-[var(--color-muted)]">{formatCurrencyCompact(currentValue, currency)}</span>
         <span className="text-[var(--color-muted)]">→</span>
-        <span className="text-[var(--color-text)] font-semibold">₹{scenarioValue.toFixed(1)}L</span>
+        <span className="text-[var(--color-text)] font-semibold">{formatCurrencyCompact(scenarioValue, currency)}</span>
         <span className={`ml-auto font-semibold ${positive ? 'text-[var(--color-positive)]' : 'text-[var(--color-negative)]'}`}>
           {positive ? '+' : ''}
-          ₹{delta.toFixed(1)}L
+          {formatCurrencyCompact(delta, currency)}
         </span>
       </div>
     </div>

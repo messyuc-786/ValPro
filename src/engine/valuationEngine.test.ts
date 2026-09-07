@@ -3,7 +3,9 @@ import { createEmptyProfile } from '../types/profile'
 import type { Profile } from '../types/profile'
 import { applyScenario, deriveRoleLevel, evaluateProfile } from './valuationEngine'
 import { technologyPack } from '../domains/technology'
+import { bankingPack } from '../domains/banking'
 import type { EvaluatedValuationResult, ValuationResult } from '../types/valuation'
+import { formatCurrencyAmount } from '../types/currency'
 
 /** Every test below evaluates a domain known to have benchmark data
  * ('partial' evidence — a development fixture, not verified market data)
@@ -277,5 +279,62 @@ describe('valuation integrity — no false precision', () => {
     const highSpread = (highConfidence.upperRangeLPA - highConfidence.lowerRangeLPA) / highConfidence.marketValueLPA
     const lowSpread = (lowConfidence.upperRangeLPA - lowConfidence.lowerRangeLPA) / lowConfidence.marketValueLPA
     expect(lowSpread).toBeGreaterThan(highSpread)
+  })
+})
+
+/** Regression tests for the currency/valuation bug investigation
+ * (docs/VALPRO_CURRENCY_VALUATION_FIX_REPORT.md). ValPro's launch market is
+ * India, and every result must carry an explicit currency read from the
+ * domain's benchmark data — never a bare number, never a hardcoded symbol,
+ * never USD/$ for an India-only fixture. */
+describe('currency / market data model', () => {
+  it('tags an India (technology domain) profile\'s result with INR', () => {
+    const result = asEvaluated(evaluateProfile(techProfile()))
+    expect(result.currency).toBe('INR')
+  })
+
+  it('uses the LPA unit label for an INR result, not a generic "per year"', () => {
+    const result = asEvaluated(evaluateProfile(techProfile()))
+    expect(formatCurrencyAmount(result.marketValueLPA, result.currency)).toMatch(/LPA$/)
+  })
+
+  it('formats the headline value as "₹X.X LPA" — the exact shape ResultOverview renders', () => {
+    const result = asEvaluated(evaluateProfile(techProfile()))
+    const formatted = formatCurrencyAmount(result.marketValueLPA, result.currency)
+    expect(formatted).toMatch(/^₹\d+\.\d LPA$/)
+  })
+
+  it('never uses USD or a "$" symbol for an India-domain result', () => {
+    const result = asEvaluated(evaluateProfile(techProfile()))
+    const formatted = formatCurrencyAmount(result.marketValueLPA, result.currency)
+    expect(formatted).not.toContain('$')
+    expect(result.currency).not.toBe('USD')
+  })
+
+  it('respects the currency declared on the evaluated domain\'s own benchmark, not a value hardcoded in the engine', () => {
+    // Technology and Banking are two independently-defined benchmarks; both
+    // currently declare 'INR', and the engine must read that field from
+    // whichever benchmark actually produced the result rather than stamping
+    // a single hardcoded currency onto every result regardless of domain.
+    const techResult = asEvaluated(evaluateProfile(techProfile()))
+    const bankingResult = asEvaluated(evaluateProfile(techProfile({ domain: 'banking' })))
+    expect(techResult.currency).toBe(technologyPack.benchmark!.currency)
+    expect(bankingResult.currency).toBe(bankingPack.benchmark!.currency)
+  })
+
+  it('keeps the compact range display in the same unit as the headline value (no accidental unit conversion)', () => {
+    const result = asEvaluated(evaluateProfile(techProfile()))
+    // lowerRangeLPA/upperRangeLPA and marketValueLPA are all denominated in
+    // the same LPA unit — the range must bracket the headline value directly,
+    // not some rescaled (e.g. annual-in-rupees vs LPA) version of it.
+    expect(result.lowerRangeLPA).toBeLessThan(result.marketValueLPA)
+    expect(result.upperRangeLPA).toBeGreaterThan(result.marketValueLPA)
+    expect(result.lowerRangeLPA).toBeGreaterThan(0)
+  })
+
+  it('does not fabricate a currency for an insufficient-evidence domain — there is no marketValueLPA/currency to format', () => {
+    const result = evaluateProfile(techProfile({ domain: 'legal' }))
+    expect(result.marketEvidence).toBe('insufficient')
+    expect('currency' in result).toBe(false)
   })
 })

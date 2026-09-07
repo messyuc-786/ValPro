@@ -19,7 +19,7 @@ export function WhatIfSimulator() {
 
         <div className="mt-6 flex flex-col gap-3">
           {result.scenarios.map((s) => (
-            <ScenarioRow key={s.id} label={s.label} currentValue={s.currentValueLPA} scenarioValue={s.scenarioValueLPA} delta={s.deltaLPA} />
+            <ScenarioRow key={s.id} label={s.label} currentValue={s.currentValueLPA} scenarioValue={s.scenarioValueLPA} delta={s.deltaLPA} currency={result.currency} />
           ))}
         </div>
 

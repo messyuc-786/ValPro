@@ -15,6 +15,7 @@ export const bankingPack: DomainPack = {
 
   benchmark: {
     dataSource: 'development_fixture',
+    currency: 'INR',
   baseValueLPA: 5.8,
   perYearExperienceLPA: 1.15,
   experienceCapYears: 18,

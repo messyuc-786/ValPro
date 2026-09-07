@@ -1,5 +1,6 @@
 import type { DomainId } from './profile'
 import type { EvidenceStatus } from './domain'
+import type { CurrencyCode } from './currency'
 
 export type Confidence = 'Low' | 'Medium' | 'High'
 
@@ -37,6 +38,12 @@ interface ValuationResultCommon {
  * what `marketEvidence` tells the UI. */
 export interface EvaluatedValuationResult extends ValuationResultCommon {
   marketEvidence: Extract<EvidenceStatus, 'supported' | 'partial'>
+
+  /** Every *LPA number below is denominated in this currency — carried on
+   * the result itself (not assumed by whatever's rendering it) precisely so
+   * a formatter never has to guess or hardcode what a number means. See
+   * docs/VALPRO_CURRENCY_VALUATION_FIX_REPORT.md. */
+  currency: CurrencyCode
 
   marketValueLPA: number
   lowerRangeLPA: number

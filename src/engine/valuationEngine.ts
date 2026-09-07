@@ -386,6 +386,7 @@ export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): 
     // engine will honor automatically the day one exists (no engine change
     // needed, just benchmark.dataSource + pack.evidenceStatus flipping).
     marketEvidence: benchmark.dataSource === 'verified_market_data' ? 'supported' : 'partial',
+    currency: benchmark.currency,
     marketValueLPA: Math.round(marketValue * 10) / 10,
     lowerRangeLPA: Math.round(lowerRange * 10) / 10,
     upperRangeLPA: Math.round(upperRange * 10) / 10,

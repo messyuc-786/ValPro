@@ -16,6 +16,7 @@ export const fresherPack: DomainPack = {
 
   benchmark: {
   dataSource: 'development_fixture',
+  currency: 'INR',
   baseValueLPA: 3.2,
   perYearExperienceLPA: 0.9,
   experienceCapYears: 2,

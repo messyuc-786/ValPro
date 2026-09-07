@@ -73,6 +73,7 @@ describe('saveValuation', () => {
       domainId: 'technology',
       asOf: '2026-01-01',
       marketEvidence: 'partial',
+      currency: 'INR',
       marketValueLPA: 12.5,
       lowerRangeLPA: 10,
       upperRangeLPA: 15,

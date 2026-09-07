@@ -6,6 +6,7 @@ import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
 import { backdropFor } from '../navigation/flow'
 import { DOMAIN_OPTIONS } from '../types/profile'
+import { currencySymbol, currencyUnitLabel, formatCurrencyCompact } from '../types/currency'
 
 export function ResultOverview() {
   const { result, goTo, restart } = useApp()
@@ -80,14 +81,14 @@ export function ResultOverview() {
 
         <p className="mt-8 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">Your Market Value</p>
         <p className="mt-2 font-display text-[46px] font-medium leading-none tabular">
-          <span className="text-[var(--color-accent-blue)]">₹</span>
-          {result.marketValueLPA.toFixed(1)} <span className="text-[24px] font-sans font-semibold text-[var(--color-muted)]">LPA</span>
+          <span className="text-[var(--color-accent-blue)]">{currencySymbol(result.currency)}</span>
+          {result.marketValueLPA.toFixed(1)} <span className="text-[24px] font-sans font-semibold text-[var(--color-muted)]">{currencyUnitLabel(result.currency)}</span>
         </p>
 
         <div className="mt-4 flex items-baseline gap-2 font-mono text-[14px] text-[var(--color-muted)] tabular">
-          <span>₹{result.lowerRangeLPA.toFixed(1)}L</span>
+          <span>{formatCurrencyCompact(result.lowerRangeLPA, result.currency)}</span>
           <span className="h-px flex-1 bg-[var(--color-line-strong)]" />
-          <span>₹{result.upperRangeLPA.toFixed(1)}L</span>
+          <span>{formatCurrencyCompact(result.upperRangeLPA, result.currency)}</span>
         </div>
         <p className="mt-1 text-[11.5px] text-[var(--color-muted)]">Estimated Range</p>
 

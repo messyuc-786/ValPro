@@ -1,4 +1,5 @@
 import type { DomainId, RoleLevel } from './profile'
+import type { CurrencyCode } from './currency'
 
 /** Relative weighting of each signal group. Values are proportions and need not sum to 1 —
  * the engine normalises. Keeping them explicit per domain is what lets a Technology
@@ -67,6 +68,13 @@ export interface DomainBenchmark {
    * by hand — that change alone (plus flipping the pack's evidenceStatus to
    * 'supported') is what "adding real data" means; no engine change. */
   dataSource: 'development_fixture' | 'verified_market_data'
+
+  /** Every number below (baseValueLPA, perYearExperienceLPA, etc.) is
+   * denominated in this currency's unit — explicit and required, never
+   * inferred, so a number can never reach the UI without a known meaning.
+   * See src/types/currency.ts and
+   * docs/VALPRO_CURRENCY_VALUATION_FIX_REPORT.md. */
+  currency: CurrencyCode
 
   /** Base annual value (LPA) for an entry-level profile in this domain, before multipliers. */
   baseValueLPA: number

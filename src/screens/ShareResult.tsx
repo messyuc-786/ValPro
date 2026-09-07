@@ -5,12 +5,14 @@ import { IconDownload, IconLink, IconShare } from '../ui/icons'
 import { Backdrop, FooterMark } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
 import { backdropFor } from '../navigation/flow'
+import { formatCurrencyAmount } from '../types/currency'
+import type { CurrencyCode } from '../types/currency'
 
-function buildShareSummary(marketValue: number, score: number, topPercent: number, date: string): string {
+function buildShareSummary(marketValue: number, currency: CurrencyCode, score: number, topPercent: number, date: string): string {
   return [
     'VALPRO',
     'My Market Value',
-    `₹${marketValue.toFixed(1)} LPA`,
+    formatCurrencyAmount(marketValue, currency),
     `Market Score ${score}/100`,
     `Top ${topPercent}%`,
     date,
@@ -18,13 +20,13 @@ function buildShareSummary(marketValue: number, score: number, topPercent: numbe
   ].join('\n')
 }
 
-function buildShareSvg(marketValue: number, score: number, topPercent: number, date: string): string {
+function buildShareSvg(marketValue: number, currency: CurrencyCode, score: number, topPercent: number, date: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="760" viewBox="0 0 600 760">
     <rect width="600" height="760" fill="#121210"/>
     <rect x="40" y="40" width="520" height="680" rx="8" fill="#faf9f5"/>
     <text x="80" y="110" font-family="Georgia, serif" font-size="26" font-weight="600" fill="#111111">ValPro</text>
     <text x="80" y="160" font-family="Arial, sans-serif" font-size="13" letter-spacing="2" fill="#77736b">MY MARKET VALUE</text>
-    <text x="80" y="230" font-family="Georgia, serif" font-size="56" font-weight="600" fill="#111111">₹${marketValue.toFixed(1)} LPA</text>
+    <text x="80" y="230" font-family="Georgia, serif" font-size="56" font-weight="600" fill="#111111">${formatCurrencyAmount(marketValue, currency)}</text>
     <text x="80" y="300" font-family="Arial, sans-serif" font-size="15" fill="#111111">Market Score ${score}/100</text>
     <text x="80" y="330" font-family="Arial, sans-serif" font-size="15" fill="#4f8bd1">Top ${topPercent}%</text>
     <text x="80" y="620" font-family="Arial, sans-serif" font-size="12" fill="#77736b">${date}</text>
@@ -41,10 +43,10 @@ export function ShareResult() {
   // below: TypeScript's discriminated-union narrowing from the guard above
   // doesn't persist into nested function bodies that capture the outer
   // `result` variable, only into code in the same scope.
-  const { marketValueLPA, score, percentileTopPercent } = result
+  const { marketValueLPA, currency, score, percentileTopPercent } = result
 
   const date = new Date(result.asOf).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-  const summary = buildShareSummary(marketValueLPA, score, percentileTopPercent, date)
+  const summary = buildShareSummary(marketValueLPA, currency, score, percentileTopPercent, date)
 
   async function handleShare() {
     if (navigator.share) {
@@ -69,7 +71,7 @@ export function ShareResult() {
   }
 
   function handleDownload() {
-    const svg = buildShareSvg(marketValueLPA, score, percentileTopPercent, date)
+    const svg = buildShareSvg(marketValueLPA, currency, score, percentileTopPercent, date)
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -91,7 +93,7 @@ export function ShareResult() {
         <div className="theme-light mt-7 rounded-[8px] border border-[var(--color-line-strong)] bg-[var(--color-surface)] p-6 text-[var(--color-text)]" data-testid="share-card">
           <p className="font-display text-[16px] font-semibold">ValPro</p>
           <p className="mt-4 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[var(--color-muted)]">My Market Value</p>
-          <p className="mt-1 font-display text-[32px] font-semibold tabular">₹{result.marketValueLPA.toFixed(1)} LPA</p>
+          <p className="mt-1 font-display text-[32px] font-semibold tabular">{formatCurrencyAmount(result.marketValueLPA, currency)}</p>
           <div className="mt-4 flex items-center justify-between">
             <div>
               <p className="text-[11px] text-[var(--color-muted)]">Market Score</p>
