@@ -130,6 +130,8 @@ The live deployment (`https://messyuc-786.github.io/ValPro/`) currently returns 
 
 A `404` (rather than `403`) from GitHub's API to an unauthenticated request is the specific signature of a **repository that has been switched to Private** — GitHub's Pages free tier does not serve Pages sites for private repositories, and the API itself refuses to even confirm the repo exists to a logged-out caller.
 
+The fix was committed, pushed to `main`, and `npm run deploy` (build + `gh-pages -d dist`) completed successfully — the built assets carrying this fix are on the `gh-pages` branch. Reloading the live URL immediately after still returned the identical "Site not found," confirming the deploy itself is not the blocker; the repo's visibility is.
+
 **This means: I cannot open the actual live application and confirm the fix there, and I am not claiming to.** This is an account/repository-settings issue, not a code defect, and it is outside what a code change can fix.
 
 **Action needed from you:** in GitHub → `messyuc-786/ValPro` → Settings → General → Danger Zone, change repository visibility back to **Public** (or upgrade to a plan that serves Pages from private repos). Once that's done, live verification can actually happen — until then, no one (not just this environment) can reach the deployed app.
