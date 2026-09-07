@@ -130,9 +130,17 @@ The live deployment (`https://messyuc-786.github.io/ValPro/`) currently returns 
 
 A `404` (rather than `403`) from GitHub's API to an unauthenticated request is the specific signature of a **repository that has been switched to Private** — GitHub's Pages free tier does not serve Pages sites for private repositories, and the API itself refuses to even confirm the repo exists to a logged-out caller.
 
-The fix was committed, pushed to `main`, and `npm run deploy` (build + `gh-pages -d dist`) completed successfully — the built assets carrying this fix are on the `gh-pages` branch. Reloading the live URL immediately after still returned the identical "Site not found," confirming the deploy itself is not the blocker; the repo's visibility is.
+The fix was committed, pushed to `main`, and `npm run deploy` (build + `gh-pages -d dist`) completed successfully — the built assets carrying this fix are on the `gh-pages` branch. Reloading the live URL immediately after still returned the identical "Site not found," confirming the deploy itself was not the blocker.
 
-**This means: I cannot open the actual live application and confirm the fix there, and I am not claiming to.** This is an account/repository-settings issue, not a code defect, and it is outside what a code change can fix.
+**Update — resolved.** Two account-side settings were needed, found and fixed in sequence: (1) the repository was Private (returned 404 to unauthenticated API requests) — the user switched it to Public; (2) even after that, `api.github.com/repos/messyuc-786/ValPro/pages` still returned 404, meaning **GitHub Pages had never been enabled** for the repo (a `gh-pages` branch existing doesn't turn Pages on by itself) — the user enabled it via Settings → Pages → Deploy from a branch → `gh-pages` / root. After both fixes, the site returned `200` and I completed a full live, end-to-end walkthrough:
+
+- Cleared `localStorage` first (a prior manual test had left a stale "Telecom" domain selection cached, which surfaced correctly as an honest `insufficient` result — not a bug, just stale local state) and ran the assessment fresh: Working Professional → Technology / IT → IIT-Bombay-equivalent education → 8-12 yrs experience, no skills/certs/achievements added → Bangalore/Bangalore location.
+- **Result screen (live):** `₹46.2 LPA`, range `₹36.0L–₹58.4L`, Market Score 98/100, Top 2%, Confidence Medium — screenshot captured, no `$` anywhere.
+- **Value Gaps screen (live):** `Potential Impact +₹27.2L–₹48.9L` etc. — `GapCard`'s new currency-aware formatting confirmed working.
+- **What If? screen (live):** `₹46.2L → ₹47.7L +₹1.5L` etc. — `ScenarioRow`'s new currency-aware formatting confirmed working.
+- **Share Result screen (live):** share card renders `₹46.2 LPA` — screenshot captured — confirming `ShareResult.tsx`'s threaded `currency` prop renders correctly on the actual deployed build, not just in tests.
+
+**Live verification is complete and passed.** This is not a localhost claim — every screen above was exercised against `https://messyuc-786.github.io/ValPro/` directly.
 
 **Action needed from you:** in GitHub → `messyuc-786/ValPro` → Settings → General → Danger Zone, change repository visibility back to **Public** (or upgrade to a plan that serves Pages from private repos). Once that's done, live verification can actually happen — until then, no one (not just this environment) can reach the deployed app.
 
