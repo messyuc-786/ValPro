@@ -22,8 +22,12 @@ export type EvidenceQuality =
 export interface CompensationRange {
   min: number
   max: number
+  /** Omitted where the source only reports a range — never computed by
+   * splitting the difference, which would fabricate a data point the source
+   * didn't actually provide. */
+  median?: number
   currency: string // ISO 4217, e.g. 'INR', 'USD'
-  /** The unit the min/max are expressed in — LPA (lakhs per annum) is
+  /** The unit the min/max/median are expressed in — LPA (lakhs per annum) is
    * ValPro's internal unit today; a source may report annually, monthly, or
    * hourly and this records which, so conversion is explicit, not assumed. */
   period: 'annual' | 'monthly' | 'hourly'
@@ -49,9 +53,12 @@ export interface MarketEvidenceSource {
   // --- what it's evidence of ---
   domainId: string // matches DomainId once assigned to a pack
   role: string
+  specialization?: string // e.g. "Machine Learning" within Technology — omitted where the source isn't specialization-specific
+  industry?: string // e.g. "IT Services" vs "FinTech" — omitted where the source doesn't break out by industry
   experienceBand: string // matches ExperienceBandId shape, e.g. '3-5'
   educationLevel?: string // matches Qualification, where education level is relevant to the role
-  market: string // country, e.g. "India"
+  companyTier?: string // e.g. "Startup" / "Mid-size" / "Enterprise" — omitted where the source doesn't segment by company size
+  market: string // country, e.g. "India" — must match a SupportedMarket.id (src/types/market.ts) before this source can back a live benchmark
   cityRegion?: string // e.g. "Bangalore" — omitted where the source is not city-specific
 
   compensation: CompensationRange

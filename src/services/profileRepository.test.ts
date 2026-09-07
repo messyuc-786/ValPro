@@ -17,7 +17,7 @@ vi.mock('../lib/supabaseClient', () => ({
   getSupabaseClient: () => mockClient,
 }))
 
-const { loadCloudProfile, saveCloudProfile, loadSavedValuations, saveValuation, migrateLocalProfileToCloud } = await import('./profileRepository')
+const { loadCloudProfile, saveCloudProfile, loadSavedValuations, saveValuation, deleteValuation, migrateLocalProfileToCloud } = await import('./profileRepository')
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -125,6 +125,20 @@ describe('loadSavedValuations', () => {
     await loadSavedValuations('user-1')
     expect(eq).toHaveBeenCalledWith('user_id', 'user-1')
     expect(order).toHaveBeenCalledWith('created_at', { ascending: false })
+  })
+})
+
+describe('deleteValuation', () => {
+  it('scopes the delete to both the valuation id and the given user id — never lets one user delete another\'s row', async () => {
+    const eq2 = vi.fn().mockResolvedValue({ error: null })
+    const eq1 = vi.fn().mockReturnValue({ eq: eq2 })
+    const del = vi.fn().mockReturnValue({ eq: eq1 })
+    mockFrom.mockReturnValue({ delete: del })
+
+    const result = await deleteValuation('user-1', 'valuation-42')
+    expect(eq1).toHaveBeenCalledWith('id', 'valuation-42')
+    expect(eq2).toHaveBeenCalledWith('user_id', 'user-1')
+    expect(result).toEqual({ ok: true, data: undefined })
   })
 })
 

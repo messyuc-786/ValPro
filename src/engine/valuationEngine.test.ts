@@ -338,3 +338,43 @@ describe('currency / market data model', () => {
     expect('currency' in result).toBe(false)
   })
 })
+
+/** Regression tests for the target-market architecture fix
+ * (docs/VALPRO_MARKET_DATA_ARCHITECTURE.md). `profile.location.targetMarket`
+ * was previously free text, silently ignored by the engine — a user stating
+ * "Dubai" still got a confidently-presented India-benchmarked result. It is
+ * now a constrained choice (src/types/market.ts) the engine actually checks,
+ * without ever string-matching arbitrary free text. */
+describe('target-market evidence gate', () => {
+  it('proceeds normally when no target market is stated (unset, not unsupported)', () => {
+    const result = asEvaluated(evaluateProfile(techProfile({ location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: '' } })))
+    expect(result.marketValueLPA).toBeGreaterThan(0)
+  })
+
+  it('proceeds normally when the target market is the one supported market (India)', () => {
+    const result = asEvaluated(evaluateProfile(techProfile({ location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'India' } })))
+    expect(result.marketValueLPA).toBeGreaterThan(0)
+  })
+
+  it('returns honest insufficient evidence for the "Other / Not Listed" market — never an India-fabricated number', () => {
+    const result = evaluateProfile(techProfile({ location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'OTHER' } }))
+    expect(result.marketEvidence).toBe('insufficient')
+    expect('marketValueLPA' in result).toBe(false)
+    if (result.marketEvidence !== 'insufficient') throw new Error('expected insufficient evidence')
+    expect(result.reason.length).toBeGreaterThan(0)
+    expect(result.suggestedAction.toLowerCase()).toContain('india')
+  })
+
+  it('returns honest insufficient evidence for any unrecognized market value, without string-matching its content', () => {
+    // Deliberately an arbitrary, never-special-cased string — proving the
+    // gate works by checking membership in SUPPORTED_MARKETS, not by
+    // pattern-matching known city/country names.
+    const result = evaluateProfile(techProfile({ location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'Atlantis' } }))
+    expect(result.marketEvidence).toBe('insufficient')
+  })
+
+  it('never fabricates a currency alongside the unsupported-market result', () => {
+    const result = evaluateProfile(techProfile({ location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'OTHER' } }))
+    expect('currency' in result).toBe(false)
+  })
+})

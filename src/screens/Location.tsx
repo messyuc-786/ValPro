@@ -1,8 +1,9 @@
 import { useApp } from '../state/AppContext'
 import { ScreenShell } from '../ui/ScreenShell'
 import { Button } from '../ui/Button'
-import { FieldGroup, FieldLabel, SelectField, TextField } from '../ui/fields'
+import { FieldGroup, FieldLabel, SelectField } from '../ui/fields'
 import { LOCATIONS } from '../types/profile'
+import { SUPPORTED_MARKETS, UNLISTED_MARKET_ID } from '../types/market'
 
 export function Location() {
   const { profile, dispatch, goNext, goBack } = useApp()
@@ -46,12 +47,19 @@ export function Location() {
 
         <FieldGroup>
           <FieldLabel htmlFor="targetMarket">Target Market (for opportunities)</FieldLabel>
-          <TextField
+          <SelectField
             id="targetMarket"
-            placeholder="e.g. India"
             value={location.targetMarket}
             onChange={(e) => dispatch({ type: 'SET_LOCATION', location: { targetMarket: e.target.value } })}
-          />
+          >
+            <option value="">Same as current location</option>
+            {SUPPORTED_MARKETS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+            <option value={UNLISTED_MARKET_ID}>Other / Not Listed</option>
+          </SelectField>
         </FieldGroup>
 
         <FieldGroup>

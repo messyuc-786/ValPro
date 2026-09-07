@@ -24,6 +24,7 @@ import type {
 import { DOMAIN_OPTIONS, experienceYears } from '../types/profile'
 import type { Confidence, EvaluatedValuationResult, ScenarioResult, Signal, ValueGap, ValuationResult } from '../types/valuation'
 import { getDomainPack } from '../domains/registry'
+import { isSupportedMarket, marketLabel } from '../types/market'
 
 const ACHIEVEMENT_BASE_VALUE_LPA: Record<AchievementEntry['category'], number> = {
   leadership: 0.5,
@@ -344,6 +345,31 @@ export function evaluateProfile(profile: Profile, domainIdOverride?: DomainId): 
   const domainId = domainIdOverride ?? profile.domain ?? 'technology'
   const pack = getDomainPack(domainId)
   const asOf = new Date().toISOString().slice(0, 10)
+
+  // Target-market gate: every current benchmark is India-only. An explicit,
+  // non-empty targetMarket that isn't in SUPPORTED_MARKETS (either the
+  // "Other / Not Listed" sentinel or, for any profile written before this
+  // field was constrained, leftover free text) must never silently receive
+  // an India-calibrated number — see docs/VALPRO_MARKET_DATA_ARCHITECTURE.md
+  // and the currency/valuation fix investigation that first found this gap.
+  // An unset targetMarket ('') is NOT treated as unsupported — it means "no
+  // explicit market stated," which defaults to the domain's benchmark
+  // market as before, not a block.
+  const targetMarket = profile.location.targetMarket
+  if (targetMarket && !isSupportedMarket(targetMarket)) {
+    return {
+      domainId,
+      asOf,
+      marketEvidence: 'insufficient',
+      reason: `ValPro doesn't yet have market evidence for ${marketLabel(targetMarket)}. Every current benchmark is calibrated for India.`,
+      missingEvidence: [
+        'Verified compensation data for the selected target market',
+        'A currency/market calibration for this region (see src/types/market.ts)',
+      ],
+      suggestedAction: 'Select India as your target market to see a real estimate today, or check back once this market has verified data.',
+      profileCompletenessRatio: completeness(profile),
+    }
+  }
 
   if (pack.evidenceStatus === 'insufficient' || !pack.benchmark) {
     const missingEvidence = [

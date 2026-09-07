@@ -221,7 +221,15 @@ export type LocationName = (typeof LOCATIONS)[number]
 
 export interface LocationInfo {
   current: LocationName | ''
-  targetMarket: string // free text market, e.g. "India", "UAE"
+  /** A `SupportedMarket.id` (src/types/market.ts), the `UNLISTED_MARKET_ID`
+   * sentinel ("Other / Not Listed" — a market the user explicitly says
+   * ValPro doesn't cover), or '' (unset — treated as "same as current",
+   * not as "unsupported"). Was free text before the currency/valuation fix
+   * investigation found it was silently ignored by the engine — now a
+   * constrained choice so the engine can honestly detect an unsupported
+   * market instead of guessing from arbitrary text. See
+   * docs/VALPRO_MARKET_DATA_ARCHITECTURE.md. */
+  targetMarket: string
   targetCity: LocationName | ''
 }
 

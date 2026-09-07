@@ -115,6 +115,19 @@ export async function saveValuation(userId: string, result: ValuationResult): Pr
   return { ok: true, data: undefined }
 }
 
+/** Deletes one of the signed-in user's own saved valuations. Relies on
+ * supabase/migrations/0002_valuation_history_delete.sql's owner-scoped
+ * delete policy as the actual enforcement — the `.eq('user_id', userId)`
+ * here is defense in depth, not the primary guard. */
+export async function deleteValuation(userId: string, valuationId: string): Promise<RepoResult> {
+  const client = getSupabaseClient()
+  if (!client) return notConfigured()
+
+  const { error } = await client.from('valuation_history').delete().eq('id', valuationId).eq('user_id', userId)
+  if (error) return { ok: false, reason: 'error', message: toHumanMessage() }
+  return { ok: true, data: undefined }
+}
+
 /**
  * Local-first → cloud transition: called once, right after a successful
  * sign-in, only when the user's cloud profile has no ValPro data yet. Never
