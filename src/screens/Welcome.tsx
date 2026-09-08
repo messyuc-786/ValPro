@@ -44,7 +44,9 @@ function AccountEntry({ compact = false }: { compact?: boolean }) {
     const username = typeof session.user.user_metadata?.username === 'string' ? session.user.user_metadata.username : 'Account'
     return (
       <div className={`flex items-center gap-2 ${size} font-medium`}>
-        <span className="text-[var(--color-text)]/90">{username}</span>
+        <button type="button" onClick={() => goTo('account')} className="text-[var(--color-text)]/90 hover:text-[var(--color-accent-blue)]">
+          {username}
+        </button>
         <button type="button" onClick={() => signOutUser()} className="text-[var(--color-muted)] hover:text-[var(--color-accent-blue)]">
           Sign Out
         </button>

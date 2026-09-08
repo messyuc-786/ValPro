@@ -19,6 +19,8 @@ export type ScreenId =
   | 'signIn'
   | 'signUp'
   | 'forgotPassword'
+  | 'account'
+  | 'valuationDetail'
   | OnboardingScreenId
   | 'analysis'
   | 'result'
@@ -83,6 +85,8 @@ const BACKDROPS: Record<ScreenId, string> = {
   signIn: 'backdrops/creators.jpg',
   signUp: 'backdrops/creators.jpg',
   forgotPassword: 'backdrops/creators.jpg',
+  account: 'backdrops/results.jpg',
+  valuationDetail: 'backdrops/insights.jpg',
   role: 'backdrops/onboarding.jpg',
   domain: 'backdrops/onboarding.jpg',
   education: 'backdrops/onboarding.jpg',

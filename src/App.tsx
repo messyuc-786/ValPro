@@ -20,6 +20,8 @@ import { WhyThisValue } from './screens/WhyThisValue'
 import { ImprovementAreas } from './screens/ImprovementAreas'
 import { WhatIfSimulator } from './screens/WhatIfSimulator'
 import { ShareResult } from './screens/ShareResult'
+import { Account } from './screens/Account'
+import { ValuationDetail } from './screens/ValuationDetail'
 import type { ReactElement } from 'react'
 import type { ScreenId } from './navigation/flow'
 
@@ -47,6 +49,8 @@ const SCREEN_COMPONENTS: Record<ScreenId, () => ReactElement | null> = {
   signIn: SignInScreen,
   signUp: SignUpScreen,
   forgotPassword: ForgotPasswordScreen,
+  account: Account,
+  valuationDetail: ValuationDetail,
   role: YourRole,
   domain: DomainSelection,
   education: Education,

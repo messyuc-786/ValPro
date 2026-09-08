@@ -11,7 +11,8 @@ import type { ScreenId } from '../navigation/flow'
 import { evaluateProfile } from '../engine/valuationEngine'
 import type { ValuationResult } from '../types/valuation'
 import { getCurrentSession, isSupabaseConfigured, onAuthStateChange, signOut } from '../auth/authService'
-import { migrateLocalProfileToCloud } from '../services/profileRepository'
+import { migrateLocalProfileToCloud, saveValuation } from '../services/profileRepository'
+import type { SavedValuationRow } from '../services/profileRepository'
 
 interface AppContextValue {
   profile: Profile
@@ -30,6 +31,13 @@ interface AppContextValue {
   session: Session | null
   authLoading: boolean
   signOutUser: () => Promise<void>
+
+  /** The one saved valuation the Account screen navigated into for a
+   * read-only look — never recomputed, always the exact stored snapshot.
+   * Cleared on sign-out (see effect below) so a subsequent sign-in never
+   * shows a stale/previous user's row for even a frame. */
+  viewingValuation: SavedValuationRow | null
+  setViewingValuation: (row: SavedValuationRow | null) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -41,7 +49,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<ScreenId[]>(['welcome'])
   const [session, setSession] = useState<Session | null>(null)
   const [authLoading, setAuthLoading] = useState(isSupabaseConfigured)
+  const [viewingValuation, setViewingValuation] = useState<SavedValuationRow | null>(null)
   const migratedForUserId = useRef<string | null>(null)
+  const savedResultKey = useRef<string | null>(null)
 
   const dispatchAndPersist = useCallback((action: ProfileAction) => {
     dispatch(action)
@@ -137,9 +147,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return evaluateProfile(profile)
   }, [profile])
 
+  // Auto-saves a computed result to valuation_history the moment a signed-in
+  // user actually reaches the Result screen with it — this is what makes
+  // "Account → My Valuations" have anything in it at all, since nothing
+  // else in the app calls saveValuation(). Deliberately does NOT save on
+  // every profile keystroke (result recomputes on every profile change via
+  // the useMemo above) — only once per distinct (domain, value, date) key
+  // actually viewed, tracked in a ref so re-renders don't create duplicate
+  // rows. Never saves an insufficient-evidence result — there is nothing
+  // meaningful to save. Silent on failure, matching migrateLocalProfileToCloud's
+  // "sync is a bonus, local stays the source of truth" behavior.
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId || screen !== 'result' || !result || result.marketEvidence === 'insufficient') return
+    const key = `${userId}:${result.domainId}:${result.marketValueLPA}:${result.asOf}`
+    if (savedResultKey.current === key) return
+    savedResultKey.current = key
+    saveValuation(userId, result).catch(() => {})
+  }, [screen, result, session])
+
+  // Clears any historical valuation being viewed on sign-out — belongs to
+  // the account that just signed out, and must never linger into whatever
+  // renders next (a fresh sign-in, or the signed-out state).
+  useEffect(() => {
+    if (!session) setViewingValuation(null)
+  }, [session])
+
   const value = useMemo<AppContextValue>(
-    () => ({ profile, dispatch: dispatchAndPersist, screen, history, goTo, goNext, goBack, result, restart, session, authLoading, signOutUser }),
-    [profile, dispatchAndPersist, screen, history, goTo, goNext, goBack, result, restart, session, authLoading, signOutUser],
+    () => ({
+      profile,
+      dispatch: dispatchAndPersist,
+      screen,
+      history,
+      goTo,
+      goNext,
+      goBack,
+      result,
+      restart,
+      session,
+      authLoading,
+      signOutUser,
+      viewingValuation,
+      setViewingValuation,
+    }),
+    [profile, dispatchAndPersist, screen, history, goTo, goNext, goBack, result, restart, session, authLoading, signOutUser, viewingValuation],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

@@ -59,7 +59,7 @@ export async function saveCloudProfile(userId: string, profile: Profile): Promis
   return { ok: true, data: undefined }
 }
 
-interface SavedValuationRow {
+export interface SavedValuationRow {
   id: string
   domain_id: string
   market_evidence: string
