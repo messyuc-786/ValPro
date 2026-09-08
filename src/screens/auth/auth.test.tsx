@@ -1,9 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { SignIn } from './SignIn'
-import { SignUp } from './SignUp'
-import { ForgotPassword } from './ForgotPassword'
+
+// Forces the "no Supabase project configured" baseline deterministically,
+// regardless of whatever real .env.local happens to exist on the machine
+// running the tests (e.g. once a developer connects a real Supabase
+// project for manual testing — see docs/VALPRO_SUPABASE_SETUP.md). Without
+// this mock, these tests would pass or fail based on ambient local
+// configuration instead of the specific "not configured" behavior they
+// document and pin down.
+vi.mock('../../lib/supabaseClient', () => ({
+  isSupabaseConfigured: false,
+  getSupabaseClient: () => null,
+}))
+
+const { SignIn } = await import('./SignIn')
+const { SignUp } = await import('./SignUp')
+const { ForgotPassword } = await import('./ForgotPassword')
 
 /**
  * These screens are not wired into the app's navigation yet (see

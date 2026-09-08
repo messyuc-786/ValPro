@@ -1,7 +1,18 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import App from './App'
+
+// This suite includes a test that specifically pins down the "no Supabase
+// project configured" navigation/copy — forced deterministically here
+// regardless of whatever real .env.local exists on the machine running the
+// tests (e.g. once a developer connects a real project for manual testing —
+// see docs/VALPRO_SUPABASE_SETUP.md).
+vi.mock('./lib/supabaseClient', () => ({
+  isSupabaseConfigured: false,
+  getSupabaseClient: () => null,
+}))
+
+const { default: App } = await import('./App')
 
 /**
  * End-to-end-ish flow test driven through the real App + AppProvider, exercising
