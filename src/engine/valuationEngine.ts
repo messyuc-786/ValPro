@@ -14,7 +14,7 @@
  * one — evaluateProfile() returns an InsufficientEvidenceResult instead,
  * with a reason, what evidence is missing, and a real next action.
  */
-import type { DomainBenchmark, DomainPack, ScenarioDefinition } from '../types/domain'
+import type { DomainBenchmark, DomainPack, InstituteTier, ScenarioDefinition } from '../types/domain'
 import type {
   AchievementEntry,
   DomainId,
@@ -61,7 +61,7 @@ export function deriveRoleLevel(profile: Profile): RoleLevel {
   return level
 }
 
-function instituteTier(benchmark: DomainBenchmark, institute: string): 'tier1' | 'tier2' | 'tier3' {
+function instituteTier(benchmark: DomainBenchmark, institute: string): InstituteTier {
   const value = normalize(institute)
   if (!value) return 'tier3'
   if (benchmark.instituteTierKeywords.tier1.some((kw) => value.includes(kw))) return 'tier1'

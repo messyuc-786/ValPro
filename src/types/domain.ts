@@ -53,6 +53,14 @@ export interface ScenarioDefinition {
  */
 export type EvidenceStatus = 'supported' | 'partial' | 'insufficient'
 
+/** Institute prestige tier, derived from `DomainBenchmark.instituteTierKeywords`
+ * (see `instituteTier()` in src/engine/valuationEngine.ts) — "education tier"
+ * in market-evidence terms (src/types/marketEvidence.ts), as distinct from
+ * `educationLevel` (qualification, e.g. "Bachelor's Degree"). Named here so
+ * both the engine and the evidence model share one type instead of two
+ * independently-typed 'tier1'/'tier2'/'tier3' string literals drifting apart. */
+export type InstituteTier = 'tier1' | 'tier2' | 'tier3'
+
 /**
  * The numeric calibration a domain needs before the engine can compute a
  * value for it. `dataSource` makes the fixture/real distinction a checkable
@@ -91,7 +99,7 @@ export interface DomainBenchmark {
     tier1: string[]
     tier2: string[]
   }
-  instituteTierMultipliers: { tier1: number; tier2: number; tier3: number }
+  instituteTierMultipliers: Record<InstituteTier, number>
 
   /** Known skills and their relative market-demand weight. Unlisted skills use defaultSkillDemand. */
   knownSkills: Record<string, number>

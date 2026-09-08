@@ -377,4 +377,12 @@ describe('target-market evidence gate', () => {
     const result = evaluateProfile(techProfile({ location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'OTHER' } }))
     expect('currency' in result).toBe(false)
   })
+
+  it('gates every benchmarked domain the same way — never just technology — with no domain silently falling back to India data for an unsupported market', () => {
+    for (const domain of ['technology', 'banking', 'education', 'fresher'] as const) {
+      const result = evaluateProfile(techProfile({ domain, location: { current: 'Bangalore', targetCity: 'Bangalore', targetMarket: 'OTHER' } }))
+      expect(result.marketEvidence).toBe('insufficient')
+      expect('marketValueLPA' in result).toBe(false)
+    }
+  })
 })

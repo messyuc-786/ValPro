@@ -7,8 +7,10 @@
  * fixtures, or example numbers — populating it with anything not genuinely
  * sourced and verifiable would be exactly the fabrication ValPro's honesty
  * rule forbids. See docs/VALPRO_PHASE_3_REPORT.md for what "wiring in real
- * data" actually involves once a source exists.
+ * data" actually involves once a source exists, and
+ * docs/VALPRO_MARKET_DATA_STATUS.md for the current architecture summary.
  */
+import type { EvidenceStatus, InstituteTier } from './domain'
 
 /** How the figures in one MarketEvidenceSource were actually obtained —
  * shown to the user (see evidence-quality copy in Result / How It Works)
@@ -56,7 +58,11 @@ export interface MarketEvidenceSource {
   specialization?: string // e.g. "Machine Learning" within Technology — omitted where the source isn't specialization-specific
   industry?: string // e.g. "IT Services" vs "FinTech" — omitted where the source doesn't break out by industry
   experienceBand: string // matches ExperienceBandId shape, e.g. '3-5'
-  educationLevel?: string // matches Qualification, where education level is relevant to the role
+  educationLevel?: string // matches Qualification (e.g. "Bachelor's Degree") — the degree level, not institute prestige
+  /** Institute prestige tier ("education tier") — see `InstituteTier` in
+   * src/types/domain.ts. Distinct from `educationLevel` above: a source can
+   * be tier1-specific ("IIT graduates only") independent of degree level. */
+  instituteTier?: InstituteTier
   companyTier?: string // e.g. "Startup" / "Mid-size" / "Enterprise" — omitted where the source doesn't segment by company size
   market: string // country, e.g. "India" — must match a SupportedMarket.id (src/types/market.ts) before this source can back a live benchmark
   cityRegion?: string // e.g. "Bangalore" — omitted where the source is not city-specific
@@ -71,6 +77,15 @@ export interface MarketEvidenceSource {
    * a vague feeling. Left unset only for sources with no natural expiry
    * (e.g. a fixed historical study cited for context). */
   staleAfterMonths?: number
+
+  /** This source's own evidence tier — reuses `EvidenceStatus`
+   * (src/types/domain.ts) rather than a parallel enum. A single source is
+   * normally 'supported' (it's why the field exists — self-declaring
+   * "insufficient" or "partial" wouldn't be evidence worth adding); kept
+   * explicit rather than assumed so a downgraded/disputed source can be
+   * marked without deleting it, preserving the audit trail this registry
+   * exists for. */
+  evidenceStatus: EvidenceStatus
 }
 
 /**

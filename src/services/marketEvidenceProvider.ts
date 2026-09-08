@@ -1,4 +1,5 @@
 import type { MarketEvidenceSource } from '../types/marketEvidence'
+import type { InstituteTier } from '../types/domain'
 
 /**
  * The abstraction boundary between the valuation engine and WHERE market
@@ -21,10 +22,30 @@ import type { MarketEvidenceSource } from '../types/marketEvidence'
 export interface MarketEvidenceQuery {
   domainId: string
   role?: string
+  specialization?: string
+  industry?: string
   experienceBand?: string
+  instituteTier?: InstituteTier
+  companyTier?: string
   market: string // must match a SupportedMarket.id (src/types/market.ts)
   cityRegion?: string
 }
+
+/**
+ * MATCHING HONESTY — for whoever implements a real provider later:
+ * every dimension above is optional on the query for a reason (the caller
+ * may not know a person's specialization/companyTier/etc.), but a matched
+ * `MarketEvidenceSource` must never be presented as though it satisfied a
+ * dimension it didn't actually have data for. A source with no
+ * `specialization` is evidence for "this role in general," not silently
+ * "this role with this specialization" — return it, but the caller (the
+ * eventual engine integration) must weight/label it as broader, less
+ * specific evidence, exactly the same distinction `EvidenceStatus`
+ * ('supported' vs 'partial') already makes for benchmark-level confidence.
+ * Do not add a matching implementation here speculatively — there is
+ * nothing to match against yet (`marketEvidenceSources` is empty); this
+ * comment exists so the requirement isn't lost by the time there is.
+ */
 
 export type MarketEvidenceQueryResult =
   | { available: true; sources: MarketEvidenceSource[] }
