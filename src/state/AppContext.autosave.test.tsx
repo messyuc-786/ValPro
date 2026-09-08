@@ -33,6 +33,20 @@ vi.mock('../services/profileRepository', () => ({
 }))
 
 const { default: App } = await import('../App')
+const { AppProvider, useApp } = await import('./AppContext')
+const { loadProfile } = await import('./persistence')
+
+/** Minimal harness to trigger signOutUser directly, bypassing the several
+ * screens of UI back-navigation it would otherwise take to reach a visible
+ * Sign Out button from deep in the onboarding flow. */
+function SignOutHarness() {
+  const { signOutUser } = useApp()
+  return (
+    <button type="button" onClick={() => signOutUser()}>
+      trigger-sign-out
+    </button>
+  )
+}
 
 async function reachResult(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getAllByRole('button', { name: /discover your market value/i })[0])
@@ -86,4 +100,39 @@ describe('AppContext — auto-save on reaching Result while signed in', () => {
     expect(await screen.findByText(/your market value/i)).toBeInTheDocument()
     expect(mockSaveValuation).toHaveBeenCalledTimes(1)
   }, 15000)
+})
+
+describe('AppContext — sign-out clears the local profile draft', () => {
+  it('wipes the local profile on sign-out, so it cannot leak into a different account signing in next on the same browser', async () => {
+    // Regression test for a real QA finding: on a shared browser, signing
+    // out and then signing up/in as a *different* person left the previous
+    // person's local draft in localStorage, which migrateLocalProfileToCloud
+    // then copied into the new account's cloud profile as though the new
+    // person had entered it themselves.
+    const { saveProfile } = await import('./persistence')
+    const { createEmptyProfile } = await import('../types/profile')
+    saveProfile({ ...createEmptyProfile(), domain: 'technology', role: 'working_professional' })
+    expect(loadProfile()?.domain).toBe('technology')
+
+    const user = userEvent.setup()
+    render(
+      <AppProvider>
+        <SignOutHarness />
+      </AppProvider>,
+    )
+    await user.click(screen.getByText('trigger-sign-out'))
+    await new Promise((r) => setTimeout(r, 0))
+
+    // clearPersistedState() removes the key, but the provider's own
+    // "persist on every profile change" effect immediately re-saves the
+    // now-reset (empty) profile object afterward — that's fine, since an
+    // empty profile carries nothing to leak; what matters is that no
+    // meaningful field survives, which is exactly what
+    // migrateLocalProfileToCloud's own "is this worth migrating?" check
+    // looks at.
+    const after = loadProfile()
+    expect(after?.domain ?? null).toBeNull()
+    expect(after?.role ?? null).toBeNull()
+    expect(after?.education.institute ?? '').toBe('')
+  })
 })

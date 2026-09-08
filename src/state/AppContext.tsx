@@ -92,6 +92,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // No manual setSession(null) here — onAuthStateChange (below) is the
     // single source of truth for session state and will fire regardless of
     // which code path triggered the sign-out.
+
+    // Clears the local profile draft on sign-out — found during QA: on a
+    // shared browser, signing out and then signing up/in as a *different*
+    // person left the previous person's local draft sitting in
+    // localStorage, and migrateLocalProfileToCloud (below) then copied it
+    // into the new account's cloud profile as though the new person had
+    // entered it. A signed-out draft belongs to no one; wiping it here
+    // means the next sign-in on this browser starts genuinely clean,
+    // exactly like `restart()`, but without touching current screen/
+    // navigation state (callers already navigate after sign-out resolves).
+    dispatch({ type: 'RESET' })
+    clearPersistedState()
+    migratedForUserId.current = null
   }, [])
 
   // Persist on every profile change (best-effort; see persistence.ts).
