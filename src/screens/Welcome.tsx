@@ -241,103 +241,81 @@ export function Welcome() {
       </div>
 
       {/* ============ TABLET-LANDSCAPE / DESKTOP (md+, 768px) ============
-          Side-by-side split: left ~34% carries the real nav/copy/CTA on the
-          app's own background (never overlaid on the photo, so contrast is
-          never in question); right ~66% is the 3D scene, edge-blended into
-          the page so it reads as part of the layout rather than a pasted
-          rectangle. */}
+          Backdrop/environment mode, not a text-plus-image-card: the scene
+          is one full-bleed layer behind the whole hero row, running edge to
+          edge to the right and bottom of the hero (no gap, no border, no
+          fade back to the page color on those sides — the photo itself
+          reaches the edge). Only the left ~35–40%, where the copy sits, has
+          a horizontal scrim fading the image toward the page background —
+          that's the one place contrast actually needs help. The header
+          (logo + nav) sits above the hero on the plain page background,
+          not overlaid on the photo, so it's never a legibility question. */}
       <div className="hidden md:block">
-        {/* No hard height CAP here on purpose (found a real overflow bug
-            during QA: a max-height shorter than the left column's actual
-            nav+copy+CTA content pushed the CTA down into the feature strip
-            below at some width/height combinations). Instead, a min-height
-            tied to the viewport (100dvh minus the feature strip + footer's
-            own approximate height) gives the hero real presence — filling
-            most of the first screen on typical displays, per the approved
-            direction — on any screen height, rather than a guessed fixed
-            number that leaves a dead gap of page background below the fold
-            on taller screens (a second real issue found during QA) or, on
-            shorter screens, cramps against it. A min-height can only ever
-            make the row taller than its content needs, never shorter, so
-            the earlier overflow bug can't reappear. The image panel (a flex
-            sibling, stretched by default) matches whatever height the row
-            ends up being. */}
-        <div className="mx-auto flex min-h-[calc(100dvh-150px)] w-full max-w-[1600px] gap-6 px-6 py-6 lg:gap-8 lg:px-12 lg:py-8 xl:px-20">
-          <div className="flex w-[34%] shrink-0 flex-col justify-center gap-8">
-            {/* Below xl (up to 1279px), the column is too narrow for three
-                nav links + account + Sign Out on one line without wrapping —
-                collapse them into the existing hamburger menu there instead,
-                same links, just reached one tap away. Full inline nav returns
-                at xl+, where the column has room for it. */}
-            <div className="relative flex items-center justify-between">
-              <div>
-                <Wordmark markClassName="h-7 w-7" className="gap-2.5" />
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">A Bhasad.org Product</p>
-              </div>
-              <div className="flex items-center gap-4 xl:hidden">
-                <AccountEntry />
-                <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
-              </div>
-
-              {/* Absolutely positioned, not inline flow — this popover must
-                  never push the hero row's own content taller than the
-                  fixed-height band the row shares with the image panel
-                  (found during QA: an inline dropdown here made "Discover
-                  Your Market Value" collide with the feature strip below
-                  the moment the menu opened). */}
-              {menuOpen && (
-                <div className="absolute right-0 top-full z-20 mt-2 flex flex-col gap-1 rounded-[6px] border border-[var(--color-line-strong)] bg-black/85 px-5 py-3 text-right backdrop-blur-sm xl:hidden">
-                  {NAV_LINKS.map((link) => (
-                    <button
-                      key={link.label}
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false)
-                        goTo(link.target)
-                      }}
-                      className="whitespace-nowrap py-1 text-[14px] font-medium text-[var(--color-text)] hover:text-[var(--color-accent-blue)]"
-                    >
-                      {link.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col">
-              <div className="mb-6 hidden items-center gap-7 text-[13px] font-medium text-[var(--color-text)]/90 xl:flex">
-                <nav className="flex items-center gap-7">
-                  {NAV_LINKS.map((link) => (
-                    <button key={link.label} type="button" onClick={() => goTo(link.target)} className="hover:text-[var(--color-accent-blue)]">
-                      {link.label}
-                    </button>
-                  ))}
-                </nav>
-                <AccountEntry />
-              </div>
-              <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
-            </div>
+        <header className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-5 lg:px-12 lg:py-6 xl:px-20">
+          <div>
+            <Wordmark markClassName="h-7 w-7" className="gap-2.5" />
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">A Bhasad.org Product</p>
           </div>
 
-          {/* Right panel — the 3D scene, large and edge-to-edge, no card and
-              no border. Gradient fades on all four edges dissolve it into
-              the page background rather than sitting as a pasted rectangle
-              — left edge fades toward the copy, right/top/bottom fade
-              toward the page edges, so the illustration reads as something
-              the page's own atmosphere extends into. */}
-          <div className="relative min-w-0 flex-1 overflow-hidden">
-            <img
-              src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-              alt="A small group of professionals at different career stages, working together at a shared desk."
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(90deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%, rgba(14,17,22,0) 88%, var(--color-bg) 100%), linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0) 14%, rgba(14,17,22,0) 78%, var(--color-bg) 100%)',
-              }}
-            />
+          {/* Below xl (up to 1279px), there isn't reliably enough header
+              width for three nav links + account + Sign Out on one line —
+              collapse them into the hamburger menu there instead, same
+              links, one tap away. Full inline nav returns at xl+. */}
+          <div className="relative flex items-center gap-4 xl:hidden">
+            <AccountEntry />
+            <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-20 mt-2 flex flex-col gap-1 rounded-[6px] border border-[var(--color-line-strong)] bg-black/85 px-5 py-3 text-right backdrop-blur-sm">
+                {NAV_LINKS.map((link) => (
+                  <button
+                    key={link.label}
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      goTo(link.target)
+                    }}
+                    className="whitespace-nowrap py-1 text-[14px] font-medium text-[var(--color-text)] hover:text-[var(--color-accent-blue)]"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="hidden items-center gap-7 text-[13px] font-medium text-[var(--color-text)]/90 xl:flex">
+            <nav className="flex items-center gap-7">
+              {NAV_LINKS.map((link) => (
+                <button key={link.label} type="button" onClick={() => goTo(link.target)} className="hover:text-[var(--color-accent-blue)]">
+                  {link.label}
+                </button>
+              ))}
+            </nav>
+            <AccountEntry />
+          </div>
+        </header>
+
+        {/* No hard height CAP on purpose (found a real overflow bug during
+            QA: a max-height shorter than the copy's actual content pushed
+            the CTA into the feature strip below at some sizes). A
+            min-height tied to the viewport instead gives the hero real
+            presence on any screen height without that risk — a minimum can
+            only make the section taller than its content needs, never
+            shorter. */}
+        <div className="relative min-h-[calc(100dvh-220px)] w-full overflow-hidden">
+          <img
+            src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
+            alt="A small group of professionals at different career stages, working together at a shared desk."
+            className="absolute inset-0 h-full w-full object-cover object-right"
+          />
+          {/* Left-side scrim only — the photo reaches the hero's own right
+              and bottom edges untouched, so it reads as the hero's
+              environment rather than a framed picture. */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: 'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%)' }}
+          />
+          <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] items-center px-6 lg:px-12 xl:px-20">
+            <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
           </div>
         </div>
 
