@@ -8,12 +8,14 @@ const EYEBROW_SIGNALS = ['Your Skills', 'Your Experience', 'Market Reality', 'Yo
 
 // Truthful product descriptors — no invented user counts, satisfaction
 // percentages, or adoption claims. Every one of these is something the
-// product actually does, not a measured/marketed statistic.
+// product actually does, not a measured/marketed statistic. The subtext
+// is likewise descriptive of the product's own mechanics, not a claim
+// about outcomes or data it doesn't have.
 const VALUE_POINTS = [
-  { label: 'Multiple Career Paths', icon: IconBriefcase },
-  { label: 'Profile-Based Valuation', icon: IconCheck },
-  { label: 'Market-Aware Insights', icon: IconSearch },
-  { label: 'Built for Better Decisions', icon: IconTarget },
+  { label: 'Multiple Career Paths', sub: 'From fresher to leadership', icon: IconBriefcase },
+  { label: 'Profile-Based Valuation', sub: 'Your unique journey matters', icon: IconCheck },
+  { label: 'Market-Aware Insights', sub: 'Based on real market trends', icon: IconSearch },
+  { label: 'Built for Better Decisions', sub: 'Plan. Upskill. Grow.', icon: IconTarget },
 ]
 
 // Each nav link now routes to its own distinct screen — About (the creator
@@ -79,9 +81,12 @@ function ValuePointsRow({ compact = false }: { compact?: boolean }) {
   return (
     <div className={`grid grid-cols-2 sm:grid-cols-4 ${compact ? 'gap-3' : 'gap-6'}`}>
       {VALUE_POINTS.map((v) => (
-        <div key={v.label} className={`flex items-center text-left ${compact ? 'gap-2' : 'gap-3'}`}>
-          <v.icon className={`shrink-0 text-[var(--color-accent)] ${compact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-          <span className={`leading-tight text-[var(--color-muted)] ${compact ? 'text-[10.5px]' : 'text-[13.5px]'}`}>{v.label}</span>
+        <div key={v.label} className={`flex items-start text-left ${compact ? 'gap-2' : 'gap-3'}`}>
+          <v.icon className={`mt-0.5 shrink-0 text-[var(--color-accent)] ${compact ? 'h-4 w-4' : 'h-5 w-5'}`} />
+          <div className="leading-tight">
+            <p className={`font-semibold text-[var(--color-text)] ${compact ? 'text-[10.5px]' : 'text-[13.5px]'}`}>{v.label}</p>
+            {!compact && <p className="mt-0.5 text-[11.5px] text-[var(--color-muted)]">{v.sub}</p>}
+          </div>
         </div>
       ))}
     </div>
@@ -225,7 +230,7 @@ export function Welcome() {
           <div className="relative mt-5 aspect-[21/10] w-full overflow-hidden">
             <img
               src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
-              alt="A small group of professionals at different career stages, working together at a shared desk."
+              alt="Professionals at different career stages, each with a speech bubble, working together at a shared desk."
               className="absolute inset-0 h-full w-full object-cover object-[65%_center]"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/40 via-transparent to-[var(--color-bg)]/50" />
@@ -301,20 +306,27 @@ export function Welcome() {
             presence on any screen height without that risk — a minimum can
             only make the section taller than its content needs, never
             shorter. */}
-        <div className="relative min-h-[calc(100dvh-220px)] w-full overflow-hidden">
+        <div className="relative min-h-[calc(100dvh-230px)] w-full overflow-hidden">
           {/* One full-bleed environment layer — no card, no border, no
               rectangular edge on the right or bottom of the hero; the photo
-              itself reaches those edges. A natural desk/office crop with no
-              baked messaging (no bubbles, no dog) — only a left-side scrim
-              fades it toward the page background where the copy sits. */}
+              itself reaches those edges. object-center keeps all five
+              characters and their speech bubbles in frame across widths,
+              matching the approved reference exactly (career-stage bubbles
+              intact) rather than a bubble-free re-crop. */}
           <img
             src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-            alt="A small group of professionals at different career stages, working together at a shared desk."
-            className="absolute inset-0 h-full w-full object-cover object-right"
+            alt="Five professionals at different career stages — fresher, working professional, career switcher, upskiller — each with a speech bubble, working together at a shared desk."
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
+          {/* Left-to-right scrim for copy legibility, plus a shallow
+              bottom fade into the feature strip — the artwork itself
+              still reaches the hero's right edge untouched. */}
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: 'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%)' }}
+            style={{
+              background:
+                'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%), linear-gradient(180deg, rgba(14,17,22,0) 82%, var(--color-bg) 100%)',
+            }}
           />
           <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] items-center px-6 lg:px-12 xl:px-20">
             <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
