@@ -170,17 +170,32 @@ export function Welcome() {
   return (
     <div className="theme-dark relative w-full bg-[var(--color-bg)] text-[var(--color-text)]">
       {/* ============ MOBILE (<md) ============
-          A genuinely stacked composition, not the desktop hero scaled down:
-          nav → headline/copy/CTA on the app's own background (full contrast,
-          no scrim needed) → a compact, rounded 3D scene card → feature strip.
-          The card keeps the characters at a readable size instead of
-          shrinking the whole ensemble into a sliver behind text.
+          Same architecture as desktop, not a different design: ONE
+          full-bleed hero (background image behind everything, including
+          the header) with the nav, copy and CTA layered on top via real
+          HTML, then the feature strip as its own section below. No image
+          card, no separate plain-background header block.
           Breakpoint is `md` (768px), not `lg` (1024px): a real but
           unmaximized desktop browser window commonly sits in the
           768–1023px range, and that reader should see the two-column
           hero, not the phone layout. */}
-      <div className="min-h-[100dvh] md:hidden">
-        <div className="flex flex-col px-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(0.85rem_+_env(safe-area-inset-top))]">
+      <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden md:hidden">
+        <img
+          src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
+          alt="Professionals at different career stages, each with a speech bubble, working together at a shared desk."
+          className="absolute inset-0 h-full w-full object-cover object-[38%_center]"
+        />
+        {/* Top scrim (hides the artwork's own baked logo/nav row and keeps
+            the real header legible), bottom scrim (copy/CTA legibility). */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0.55) 14%, rgba(14,17,22,0.2) 30%, rgba(14,17,22,0.55) 62%, var(--color-bg) 92%)',
+          }}
+        />
+
+        <div className="relative z-10 flex flex-col px-5 pb-[calc(1.25rem_+_env(safe-area-inset-bottom))] pt-[calc(0.85rem_+_env(safe-area-inset-top))]">
           <div className="flex items-start justify-between gap-2">
             <div>
               <Wordmark markClassName="h-5 w-5" />
@@ -218,45 +233,48 @@ export function Welcome() {
               ))}
             </div>
           )}
+        </div>
 
-          <div className="mt-5">
-            <HeroCopy compact onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
-          </div>
+        {/* Copy sits lower over the scene, pinned toward the bottom of the
+            hero (above the fold) rather than centered through the middle
+            of the artwork, so the characters stay visible above it. */}
+        <div className="relative z-10 mt-auto px-5 pb-8">
+          <HeroCopy compact onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
+        </div>
+      </div>
 
-          {/* The 3D career scene — no card, no border: the image bleeds to
-              the column's full width and fades into the page at top and
-              bottom, so it reads as part of the page rather than a pasted
-              photo. */}
-          <div className="relative mt-5 aspect-[21/10] w-full overflow-hidden">
-            <img
-              src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
-              alt="Professionals at different career stages, each with a speech bubble, working together at a shared desk."
-              className="absolute inset-0 h-full w-full object-cover object-[65%_center]"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/40 via-transparent to-[var(--color-bg)]/50" />
-          </div>
-
-          <div className="mt-5 rounded-[6px] border border-[var(--color-line)] bg-black/25 px-3 py-3.5">
-            <ValuePointsRow compact />
-          </div>
-          <div className="mt-4">
-            <SiteFooter compact />
-          </div>
+      <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-5 py-5 md:hidden">
+        <div className="flex flex-col gap-5">
+          <ValuePointsRow compact />
+          <SiteFooter compact />
         </div>
       </div>
 
       {/* ============ TABLET-LANDSCAPE / DESKTOP (md+, 768px) ============
-          Backdrop/environment mode, not a text-plus-image-card: the scene
-          is one full-bleed layer behind the whole hero row, running edge to
-          edge to the right and bottom of the hero (no gap, no border, no
-          fade back to the page color on those sides — the photo itself
-          reaches the edge). Only the left ~35–40%, where the copy sits, has
-          a horizontal scrim fading the image toward the page background —
-          that's the one place contrast actually needs help. The header
-          (logo + nav) sits above the hero on the plain page background,
-          not overlaid on the photo, so it's never a legibility question. */}
-      <div className="hidden md:block">
-        <header className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-5 lg:px-12 lg:py-6 xl:px-20">
+          ONE full-bleed hero: the artwork is a single absolute background
+          layer spanning the entire section — including behind the header —
+          with the nav, copy and CTA layered on top as real HTML, not a
+          left-column-plus-right-image split. A top scrim hides the
+          artwork's own baked logo/nav row so the real header reads
+          cleanly; a left-to-right scrim carries the copy; a shallow
+          bottom scrim blends into the feature strip. The photo itself
+          still reaches the hero's right and bottom edges untouched — no
+          card, no border, no visible rectangle. */}
+      <div className="relative hidden min-h-[calc(100dvh-126px)] w-full flex-col overflow-hidden md:flex">
+        <img
+          src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
+          alt="Five professionals at different career stages — fresher, working professional, career switcher, upskiller — each with a speech bubble, working together at a shared desk."
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%), linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%), linear-gradient(180deg, rgba(14,17,22,0) 84%, var(--color-bg) 100%)',
+          }}
+        />
+
+        <header className="relative z-10 mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-5 lg:px-12 lg:py-6 xl:px-20">
           <div>
             <Wordmark markClassName="h-7 w-7" className="gap-2.5" />
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">A Bhasad.org Product</p>
@@ -299,48 +317,18 @@ export function Welcome() {
           </div>
         </header>
 
-        {/* No hard height CAP on purpose (found a real overflow bug during
-            QA: a max-height shorter than the copy's actual content pushed
-            the CTA into the feature strip below at some sizes). A
-            min-height tied to the viewport instead gives the hero real
-            presence on any screen height without that risk — a minimum can
-            only make the section taller than its content needs, never
-            shorter. */}
-        <div className="relative min-h-[calc(100dvh-230px)] w-full overflow-hidden">
-          {/* One full-bleed environment layer — no card, no border, no
-              rectangular edge on the right or bottom of the hero; the photo
-              itself reaches those edges. object-center keeps all five
-              characters and their speech bubbles in frame across widths,
-              matching the approved reference exactly (career-stage bubbles
-              intact) rather than a bubble-free re-crop. */}
-          <img
-            src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-            alt="Five professionals at different career stages — fresher, working professional, career switcher, upskiller — each with a speech bubble, working together at a shared desk."
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-          {/* Left-to-right scrim for copy legibility, plus a shallow
-              bottom fade into the feature strip — the artwork itself
-              still reaches the hero's right edge untouched. */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%), linear-gradient(180deg, rgba(14,17,22,0) 82%, var(--color-bg) 100%)',
-            }}
-          />
-          <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] items-center px-6 lg:px-12 xl:px-20">
-            <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
-          </div>
+        <div className="relative z-10 mx-auto flex w-full max-w-[1600px] flex-1 items-center px-6 lg:px-12 xl:px-20">
+          <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
         </div>
+      </div>
 
-        {/* Supporting information — the feature strip reads as the hero
-            story's conclusion: understand where you stand, what drives your
-            value, what to improve, and the decision that follows. */}
-        <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-5 lg:px-12 lg:py-6 xl:px-20">
-          <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
-            <ValuePointsRow />
-            <SiteFooter />
-          </div>
+      {/* Supporting information — the feature strip reads as the hero
+          story's conclusion: understand where you stand, what drives your
+          value, what to improve, and the decision that follows. */}
+      <div className="hidden border-t border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-5 md:block lg:px-12 lg:py-6 xl:px-20">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+          <ValuePointsRow />
+          <SiteFooter />
         </div>
       </div>
     </div>
