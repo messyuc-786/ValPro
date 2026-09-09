@@ -273,7 +273,7 @@ export function Welcome() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%), linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%), linear-gradient(180deg, rgba(14,17,22,0) 84%, var(--color-bg) 100%)',
+              'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%), linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%), linear-gradient(180deg, rgba(14,17,22,0) 96%, var(--color-bg) 100%)',
           }}
         />
 
