@@ -179,11 +179,16 @@ export function Welcome() {
           unmaximized desktop browser window commonly sits in the
           768–1023px range, and that reader should see the two-column
           hero, not the phone layout. */}
-      <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden md:hidden">
+      <div className="relative flex min-h-[600px] w-full flex-col overflow-hidden md:hidden">
+        {/* Same source image as desktop (not a separately re-cropped,
+            over-zoomed asset) — object-position tuned so the frame holds
+            three characters, their speech bubbles and the ValPro laptop
+            together, at a scale consistent with the desktop composition
+            rather than a tight, blown-up crop of just one or two faces. */}
         <img
-          src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
+          src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
           alt="Professionals at different career stages, each with a speech bubble, working together at a shared desk."
-          className="absolute inset-0 h-full w-full object-cover object-[38%_center]"
+          className="absolute inset-0 h-full w-full object-cover object-[32%_22%]"
         />
         {/* Top scrim (hides the artwork's own baked logo/nav row and keeps
             the real header legible), bottom scrim (copy/CTA legibility). */}
