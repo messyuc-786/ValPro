@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { useApp } from '../state/AppContext'
-import { Backdrop } from '../ui/Backdrop'
 import { Wordmark } from '../ui/Logo'
 import { Button } from '../ui/Button'
 import { IconArrowRight, IconBriefcase, IconCheck, IconClose, IconMenu, IconSearch, IconTarget } from '../ui/icons'
-import { backdropFor } from '../navigation/flow'
 
 const EYEBROW_SIGNALS = ['Your Skills', 'Your Experience', 'Market Reality', 'Your Value']
 
@@ -103,121 +101,185 @@ function SiteFooter({ compact = false }: { compact?: boolean }) {
   )
 }
 
+/** Shared eyebrow + headline + copy + CTA block — identical content on both
+ * layouts, just re-typeset per breakpoint via the `compact` flag. Keeping
+ * one source of this copy (rather than two near-duplicate JSX blocks)
+ * means the approved wording can't quietly drift between mobile and desktop. */
+function HeroCopy({ compact = false, onDiscover, onWhy }: { compact?: boolean; onDiscover: () => void; onWhy: () => void }) {
+  return (
+    <div className={compact ? '' : 'max-w-xl'}>
+      <div
+        className={`flex flex-col gap-0.5 font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] ${
+          compact ? 'text-[8.5px]' : 'text-[11px] tracking-[0.16em]'
+        }`}
+      >
+        {EYEBROW_SIGNALS.map((s) => (
+          <span key={s}>{s}</span>
+        ))}
+      </div>
+      <div className={`bg-[var(--color-accent-blue)] ${compact ? 'mt-2 h-px w-8' : 'mt-3 h-px w-10'}`} />
+      <h1 className={`font-display font-medium leading-[1.05] ${compact ? 'mt-3 text-[30px]' : 'mt-4 text-[44px] xl:text-[52px]'}`}>
+        Know your <br />
+        <em className="not-italic text-[var(--color-accent-blue)]">market value.</em>
+      </h1>
+      <p className={`leading-relaxed text-[var(--color-muted)] ${compact ? 'mt-2.5 max-w-[26ch] text-[12.5px]' : 'mt-4 max-w-[34ch] text-[15px]'}`}>
+        Not just your salary. Real insights for a stronger next step.
+      </p>
+
+      <div className={compact ? 'mt-4 max-w-[80%]' : 'mt-6 max-w-sm'}>
+        <Button onClick={onDiscover} className={compact ? 'w-full py-3 text-[13.5px]' : 'w-full py-3.5 text-[15px]'}>
+          <span className="flex w-full items-center justify-between">
+            Discover Your Market Value
+            <IconArrowRight className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
+          </span>
+        </Button>
+      </div>
+
+      <button
+        type="button"
+        onClick={onWhy}
+        className={`inline-flex w-fit items-center gap-1.5 border-b border-[var(--color-accent)] font-semibold text-[var(--color-accent)] ${
+          compact ? 'mt-3 pb-0.5 text-[11.5px]' : 'mt-4 pb-0.5 text-[13px]'
+        }`}
+      >
+        Why ValPro Exists <IconArrowRight className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
+      </button>
+    </div>
+  )
+}
+
 export function Welcome() {
   const { goTo } = useApp()
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <div className="theme-dark relative w-full bg-[var(--color-bg)] text-[var(--color-text)]">
-      {/* ============ MOBILE / TABLET-PORTRAIT (<lg): full-bleed backdrop card ============ */}
-      <div className="lg:hidden">
-        <Backdrop image={backdropFor('welcome')} variant="hero" objectPositionClassName="object-[center_28%]" className="min-h-[100dvh]">
-          <div className="flex h-full min-h-full flex-col px-5 pb-[calc(1.25rem_+_env(safe-area-inset-bottom))] pt-[calc(1.25rem_+_env(safe-area-inset-top))]">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <Wordmark markClassName="h-5 w-5" />
-                <p className="mt-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">A Bhasad.org Product</p>
-              </div>
-              <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5">
-                <nav className="flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 text-[9.5px] font-medium text-[var(--color-text)]/95">
-                  {NAV_LINKS.map((link) => (
-                    <button key={link.label} type="button" onClick={() => goTo(link.target)} className="whitespace-nowrap hover:text-[var(--color-accent-blue)]">
-                      {link.label}
-                    </button>
-                  ))}
-                  <span className="whitespace-nowrap">
-                    <AccountEntry compact />
-                  </span>
-                </nav>
-                <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
-              </div>
+      {/* ============ MOBILE / TABLET-PORTRAIT (<lg) ============
+          A genuinely stacked composition, not the desktop hero scaled down:
+          nav → headline/copy/CTA on the app's own background (full contrast,
+          no scrim needed) → a compact, rounded 3D scene card → feature strip.
+          The card keeps the characters at a readable size instead of
+          shrinking the whole ensemble into a sliver behind text. */}
+      <div className="min-h-[100dvh] lg:hidden">
+        <div className="flex flex-col px-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(1.25rem_+_env(safe-area-inset-top))]">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <Wordmark markClassName="h-5 w-5" />
+              <p className="mt-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">A Bhasad.org Product</p>
             </div>
-
-            {menuOpen && (
-              <div className="mt-2 flex flex-col gap-1 self-end rounded-[6px] border border-[var(--color-line-strong)] bg-black/70 px-4 py-3 text-right backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5">
+              <nav className="flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 text-[9.5px] font-medium text-[var(--color-text)]/95">
                 {NAV_LINKS.map((link) => (
-                  <button
-                    key={link.label}
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      goTo(link.target)
-                    }}
-                    className="py-1 text-[13px] font-medium text-[var(--color-text)] hover:text-[var(--color-accent-blue)]"
-                  >
+                  <button key={link.label} type="button" onClick={() => goTo(link.target)} className="whitespace-nowrap hover:text-[var(--color-accent-blue)]">
                     {link.label}
                   </button>
                 ))}
-              </div>
-            )}
-
-            <div className="mt-5">
-              <div className="flex flex-col gap-0.5 text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
-                {EYEBROW_SIGNALS.map((s) => (
-                  <span key={s}>{s}</span>
-                ))}
-              </div>
-              <div className="mt-2 h-px w-8 bg-[var(--color-accent-blue)]" />
-              <h1 className="mt-3 font-display text-[30px] font-medium leading-[1.05]">
-                Know your <br />
-                <em className="not-italic text-[var(--color-accent-blue)]">market value.</em>
-              </h1>
-              <p className="mt-2.5 max-w-[26ch] text-[12.5px] leading-relaxed text-[var(--color-muted)]">
-                Not just your salary. Real insights for a stronger next step.
-              </p>
-            </div>
-
-            <div className="mt-4 max-w-[80%]">
-              <Button onClick={() => goTo('role')} className="w-full py-3 text-[13.5px]">
-                <span className="flex w-full items-center justify-between">
-                  Discover Your Market Value
-                  <IconArrowRight className="h-3.5 w-3.5" />
+                <span className="whitespace-nowrap">
+                  <AccountEntry compact />
                 </span>
-              </Button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => goTo('creators')}
-              className="mt-3 inline-flex w-fit items-center gap-1.5 border-b border-[var(--color-accent)] pb-0.5 text-[11.5px] font-semibold text-[var(--color-accent)]"
-            >
-              Why ValPro Exists <IconArrowRight className="h-3 w-3" />
-            </button>
-
-            <div className="flex-1" />
-
-            <div className="rounded-[6px] border border-[var(--color-line)] bg-black/25 px-3 py-3.5">
-              <ValuePointsRow compact />
-            </div>
-            <div className="mt-3">
-              <SiteFooter compact />
+              </nav>
+              <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
             </div>
           </div>
-        </Backdrop>
+
+          {menuOpen && (
+            <div className="mt-2 flex flex-col gap-1 self-end rounded-[6px] border border-[var(--color-line-strong)] bg-black/70 px-4 py-3 text-right backdrop-blur-sm">
+              {NAV_LINKS.map((link) => (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    goTo(link.target)
+                  }}
+                  className="py-1 text-[13px] font-medium text-[var(--color-text)] hover:text-[var(--color-accent-blue)]"
+                >
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-5">
+            <HeroCopy compact onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
+          </div>
+
+          {/* Compact 3D career scene — a rounded card, not a full-bleed photo,
+              so it reads as an illustration accompanying the copy rather than
+              a backdrop competing with it. The card's aspect matches the
+              source crop exactly (no object-fit cropping at all) so every
+              character and speech bubble stays fully in frame and legible —
+              a cropped bubble reads as a bug, not a design choice. */}
+          <div className="relative mt-6 aspect-[31/20] w-full overflow-hidden rounded-[10px] border border-[var(--color-line-strong)] bg-[var(--color-surface)]">
+            <img
+              src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
+              alt="Illustration of five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question."
+              className="absolute inset-0 h-full w-full object-cover object-top"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/35 via-transparent to-transparent" />
+          </div>
+
+          <div className="mt-6 rounded-[6px] border border-[var(--color-line)] bg-black/25 px-3 py-3.5">
+            <ValuePointsRow compact />
+          </div>
+          <div className="mt-4">
+            <SiteFooter compact />
+          </div>
+        </div>
       </div>
 
-      {/* ============ DESKTOP / TABLET-LANDSCAPE (lg+): full-bleed photographic hero band ============ */}
+      {/* ============ TABLET-LANDSCAPE / DESKTOP (lg+) ============
+          Side-by-side split: left ~34% carries the real nav/copy/CTA on the
+          app's own background (never overlaid on the photo, so contrast is
+          never in question); right ~66% is the 3D scene, edge-blended into
+          the page so it reads as part of the layout rather than a pasted
+          rectangle. */}
       <div className="hidden lg:block">
-        {/* Hero band — the photograph is the whole composition here, not a side
-            panel. Height is capped well below the viewport height (not 100vh)
-            specifically so `object-cover` doesn't have to zoom into a small,
-            distorted sliver of this portrait-shaped source photo — see
-            Backdrop.tsx's `heroBand` scrim comment for the underlying math. */}
-        <Backdrop
-          image={backdropFor('welcome')}
-          variant="heroBand"
-          objectPositionClassName="object-[center_100%]"
-          className="h-[min(46vw,640px)] min-h-[520px]"
-        >
-          <div className="mx-auto flex h-full w-full max-w-[1600px] flex-col px-12 py-8 xl:px-20">
-            {/* Nav */}
-            <div className="flex items-center justify-between">
+        <div className="mx-auto flex h-[min(44vw,600px)] min-h-[480px] w-full max-w-[1600px] gap-10 px-12 py-8 xl:px-20">
+          <div className="flex w-[34%] shrink-0 flex-col justify-between">
+            {/* Below xl (1024–1279px), the column is too narrow for three nav
+                links + account + Sign Out on one line without wrapping —
+                collapse them into the existing hamburger menu there instead,
+                same links, just reached one tap away. Full inline nav returns
+                at xl+, where the column has room for it. */}
+            <div className="relative flex items-center justify-between">
               <div>
                 <Wordmark markClassName="h-7 w-7" className="gap-2.5" />
                 <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">A Bhasad.org Product</p>
               </div>
-              <div className="flex items-center gap-8">
-                <nav className="flex items-center gap-7 text-[13px] font-medium text-[var(--color-text)]/90">
+              <div className="flex items-center gap-4 xl:hidden">
+                <AccountEntry />
+                <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
+              </div>
+
+              {/* Absolutely positioned, not inline flow — this popover must
+                  never push the hero row's own content taller than the
+                  fixed-height band the row shares with the image panel
+                  (found during QA: an inline dropdown here made "Discover
+                  Your Market Value" collide with the feature strip below
+                  the moment the menu opened). */}
+              {menuOpen && (
+                <div className="absolute right-0 top-full z-20 mt-2 flex flex-col gap-1 rounded-[6px] border border-[var(--color-line-strong)] bg-black/85 px-5 py-3 text-right backdrop-blur-sm xl:hidden">
+                  {NAV_LINKS.map((link) => (
+                    <button
+                      key={link.label}
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        goTo(link.target)
+                      }}
+                      className="whitespace-nowrap py-1 text-[14px] font-medium text-[var(--color-text)] hover:text-[var(--color-accent-blue)]"
+                    >
+                      {link.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <div className="mb-6 hidden items-center gap-7 text-[13px] font-medium text-[var(--color-text)]/90 xl:flex">
+                <nav className="flex items-center gap-7">
                   {NAV_LINKS.map((link) => (
                     <button key={link.label} type="button" onClick={() => goTo(link.target)} className="hover:text-[var(--color-accent-blue)]">
                       {link.label}
@@ -225,70 +287,36 @@ export function Welcome() {
                   ))}
                 </nav>
                 <AccountEntry />
-                <NavMenuButton open={menuOpen} onClick={() => setMenuOpen((v) => !v)} />
               </div>
+              <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
             </div>
 
-            {menuOpen && (
-              <div className="mt-3 flex flex-col gap-1 self-end rounded-[6px] border border-[var(--color-line-strong)] bg-black/70 px-5 py-3 text-right backdrop-blur-sm">
-                {NAV_LINKS.map((link) => (
-                  <button
-                    key={link.label}
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      goTo(link.target)
-                    }}
-                    className="py-1 text-[14px] font-medium text-[var(--color-text)] hover:text-[var(--color-accent-blue)]"
-                  >
-                    {link.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Hero copy — overlaid directly on the photograph, left-aligned,
-                over the darker upper band of the scrim. */}
-            <div className="flex flex-1 flex-col justify-center">
-              <div className="flex max-w-xl flex-col">
-                <div className="flex flex-col gap-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
-                  {EYEBROW_SIGNALS.map((s) => (
-                    <span key={s}>{s}</span>
-                  ))}
-                </div>
-                <div className="mt-3 h-px w-10 bg-[var(--color-accent-blue)]" />
-
-                <h1 className="mt-4 font-display text-[44px] font-medium leading-[1.05] xl:text-[52px]">
-                  Know your <br />
-                  <em className="not-italic text-[var(--color-accent-blue)]">market value.</em>
-                </h1>
-                <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed text-[var(--color-muted)]">
-                  Not just your salary. Real insights for a stronger next step.
-                </p>
-
-                <div className="mt-6 max-w-sm">
-                  <Button onClick={() => goTo('role')} className="w-full py-3.5 text-[15px]">
-                    <span className="flex w-full items-center justify-between">
-                      Discover Your Market Value
-                      <IconArrowRight className="h-4 w-4" />
-                    </span>
-                  </Button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => goTo('creators')}
-                  className="mt-4 inline-flex w-fit items-center gap-1.5 border-b border-[var(--color-accent)] pb-0.5 text-[13px] font-semibold text-[var(--color-accent)]"
-                >
-                  Why ValPro Exists <IconArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
+            <div className="h-7" />
           </div>
-        </Backdrop>
 
-        {/* Supporting information — a distinct section below the photographic
-            hero (not overlaid on the photo), per the approved composition. */}
+          {/* Right panel — the 3D scene. A soft left-edge gradient dissolves
+              the image into the page background rather than a hard seam, and
+              a light vignette keeps the bottom edge from cutting off flatly
+              into the feature strip below. */}
+          <div className="relative min-w-0 flex-1 overflow-hidden rounded-[14px]">
+            <img
+              src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
+              alt="Illustration of five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question, set against a city skyline."
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(90deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%), linear-gradient(180deg, rgba(14,17,22,0) 72%, var(--color-bg) 100%)',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Supporting information — the feature strip reads as the hero
+            story's conclusion: understand where you stand, what drives your
+            value, what to improve, and the decision that follows. */}
         <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-12 py-8 xl:px-20">
           <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
             <ValuePointsRow />
