@@ -247,15 +247,23 @@ export function Welcome() {
           the page so it reads as part of the layout rather than a pasted
           rectangle. */}
       <div className="hidden md:block">
-        {/* No fixed/capped height here on purpose (found a real overflow bug
-            during QA: a hard px/vw cap was shorter than the left column's
-            actual nav+copy+CTA content at some width/height combinations,
-            pushing the CTA down into the feature strip below). min-h only —
-            the row's real height is however tall the left column's content
-            naturally is, and the image panel (a flex sibling, stretched by
-            default) matches that height automatically via object-cover. */}
-        <div className="mx-auto flex min-h-[400px] w-full max-w-[1600px] gap-6 px-6 py-6 lg:gap-8 lg:px-12 lg:py-8 xl:px-20">
-          <div className="flex w-[34%] shrink-0 flex-col justify-between">
+        {/* No hard height CAP here on purpose (found a real overflow bug
+            during QA: a max-height shorter than the left column's actual
+            nav+copy+CTA content pushed the CTA down into the feature strip
+            below at some width/height combinations). Instead, a min-height
+            tied to the viewport (100dvh minus the feature strip + footer's
+            own approximate height) gives the hero real presence — filling
+            most of the first screen on typical displays, per the approved
+            direction — on any screen height, rather than a guessed fixed
+            number that leaves a dead gap of page background below the fold
+            on taller screens (a second real issue found during QA) or, on
+            shorter screens, cramps against it. A min-height can only ever
+            make the row taller than its content needs, never shorter, so
+            the earlier overflow bug can't reappear. The image panel (a flex
+            sibling, stretched by default) matches whatever height the row
+            ends up being. */}
+        <div className="mx-auto flex min-h-[calc(100dvh-150px)] w-full max-w-[1600px] gap-6 px-6 py-6 lg:gap-8 lg:px-12 lg:py-8 xl:px-20">
+          <div className="flex w-[34%] shrink-0 flex-col justify-center gap-8">
             {/* Below xl (up to 1279px), the column is too narrow for three
                 nav links + account + Sign Out on one line without wrapping —
                 collapse them into the existing hamburger menu there instead,
