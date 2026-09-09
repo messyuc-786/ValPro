@@ -175,7 +175,7 @@ export function Welcome() {
           768–1023px range, and that reader should see the two-column
           hero, not the phone layout. */}
       <div className="min-h-[100dvh] md:hidden">
-        <div className="flex flex-col px-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(1.25rem_+_env(safe-area-inset-top))]">
+        <div className="flex flex-col px-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(0.85rem_+_env(safe-area-inset-top))]">
           <div className="flex items-start justify-between gap-2">
             <div>
               <Wordmark markClassName="h-5 w-5" />
@@ -218,22 +218,20 @@ export function Welcome() {
             <HeroCopy compact onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
           </div>
 
-          {/* Compact 3D career scene — a rounded card, not a full-bleed photo,
-              so it reads as an illustration accompanying the copy rather than
-              a backdrop competing with it. The card's aspect matches the
-              source crop exactly (no object-fit cropping at all) so every
-              character and speech bubble stays fully in frame and legible —
-              a cropped bubble reads as a bug, not a design choice. */}
-          <div className="relative mt-6 aspect-[31/20] w-full overflow-hidden rounded-[10px] border border-[var(--color-line-strong)] bg-[var(--color-surface)]">
+          {/* The 3D career scene — no card, no border: the image bleeds to
+              the column's full width and fades into the page at top and
+              bottom, so it reads as part of the page rather than a pasted
+              photo. */}
+          <div className="relative mt-5 aspect-[21/10] w-full overflow-hidden">
             <img
               src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
-              alt="Illustration of five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question."
-              className="absolute inset-0 h-full w-full object-cover object-top"
+              alt="Five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question."
+              className="absolute inset-0 h-full w-full object-cover object-[65%_center]"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/35 via-transparent to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/40 via-transparent to-[var(--color-bg)]/50" />
           </div>
 
-          <div className="mt-6 rounded-[6px] border border-[var(--color-line)] bg-black/25 px-3 py-3.5">
+          <div className="mt-5 rounded-[6px] border border-[var(--color-line)] bg-black/25 px-3 py-3.5">
             <ValuePointsRow compact />
           </div>
           <div className="mt-4">
@@ -249,7 +247,14 @@ export function Welcome() {
           the page so it reads as part of the layout rather than a pasted
           rectangle. */}
       <div className="hidden md:block">
-        <div className="mx-auto flex h-[min(46vw,600px)] min-h-[440px] w-full max-w-[1600px] gap-6 px-6 py-6 lg:gap-10 lg:px-12 lg:py-8 xl:px-20">
+        {/* No fixed/capped height here on purpose (found a real overflow bug
+            during QA: a hard px/vw cap was shorter than the left column's
+            actual nav+copy+CTA content at some width/height combinations,
+            pushing the CTA down into the feature strip below). min-h only —
+            the row's real height is however tall the left column's content
+            naturally is, and the image panel (a flex sibling, stretched by
+            default) matches that height automatically via object-cover. */}
+        <div className="mx-auto flex min-h-[400px] w-full max-w-[1600px] gap-6 px-6 py-6 lg:gap-8 lg:px-12 lg:py-8 xl:px-20">
           <div className="flex w-[34%] shrink-0 flex-col justify-between">
             {/* Below xl (up to 1279px), the column is too narrow for three
                 nav links + account + Sign Out on one line without wrapping —
@@ -304,25 +309,25 @@ export function Welcome() {
               </div>
               <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
             </div>
-
-            <div className="h-7" />
           </div>
 
-          {/* Right panel — the 3D scene. A soft left-edge gradient dissolves
-              the image into the page background rather than a hard seam, and
-              a light vignette keeps the bottom edge from cutting off flatly
-              into the feature strip below. */}
-          <div className="relative min-w-0 flex-1 overflow-hidden rounded-[14px]">
+          {/* Right panel — the 3D scene, large and edge-to-edge, no card and
+              no border. Gradient fades on all four edges dissolve it into
+              the page background rather than sitting as a pasted rectangle
+              — left edge fades toward the copy, right/top/bottom fade
+              toward the page edges, so the illustration reads as something
+              the page's own atmosphere extends into. */}
+          <div className="relative min-w-0 flex-1 overflow-hidden">
             <img
               src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-              alt="Illustration of five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question, set against a city skyline."
+              alt="Five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question, set against a city skyline."
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(90deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%), linear-gradient(180deg, rgba(14,17,22,0) 72%, var(--color-bg) 100%)',
+                  'linear-gradient(90deg, var(--color-bg) 0%, rgba(14,17,22,0) 12%, rgba(14,17,22,0) 88%, var(--color-bg) 100%), linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0) 14%, rgba(14,17,22,0) 78%, var(--color-bg) 100%)',
               }}
             />
           </div>
@@ -331,7 +336,7 @@ export function Welcome() {
         {/* Supporting information — the feature strip reads as the hero
             story's conclusion: understand where you stand, what drives your
             value, what to improve, and the decision that follows. */}
-        <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-6 lg:px-12 lg:py-8 xl:px-20">
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-5 lg:px-12 lg:py-6 xl:px-20">
           <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
             <ValuePointsRow />
             <SiteFooter />
