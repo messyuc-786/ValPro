@@ -225,8 +225,8 @@ export function Welcome() {
           <div className="relative mt-5 aspect-[21/10] w-full overflow-hidden">
             <img
               src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
-              alt="Five professionals at different career stages — fresher, working professional, career switcher, upskiller — each with a speech bubble, working together at a shared desk."
-              className="absolute inset-0 h-full w-full object-contain object-center"
+              alt="A small group of professionals at different career stages, working together at a shared desk."
+              className="absolute inset-0 h-full w-full object-cover object-[65%_center]"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/40 via-transparent to-[var(--color-bg)]/50" />
           </div>
@@ -302,20 +302,19 @@ export function Welcome() {
             only make the section taller than its content needs, never
             shorter. */}
         <div className="relative min-h-[calc(100dvh-220px)] w-full overflow-hidden">
-          {/* Full illustrated scene, shown exactly as approved — all five
-              characters and their speech bubbles intact, nothing cropped.
-              object-contain (not cover): the source art was originally
-              padded to its own aspect ratio in the theme's background
-              color, so it sits flush against the page with no visible seam
-              regardless of viewport width/height. */}
+          {/* One full-bleed environment layer — no card, no border, no
+              rectangular edge on the right or bottom of the hero; the photo
+              itself reaches those edges. A natural desk/office crop with no
+              baked messaging (no bubbles, no dog) — only a left-side scrim
+              fades it toward the page background where the copy sits. */}
           <img
             src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-            alt="Five professionals at different career stages — fresher, working professional, career switcher, upskiller — each with a speech bubble, working together at a shared desk."
-            className="absolute inset-0 h-full w-full object-contain object-right"
+            alt="A small group of professionals at different career stages, working together at a shared desk."
+            className="absolute inset-0 h-full w-full object-cover object-right"
           />
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: 'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 16%, rgba(14,17,22,0.25) 32%, rgba(14,17,22,0) 48%)' }}
+            style={{ background: 'linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 20%, rgba(14,17,22,0.35) 42%, rgba(14,17,22,0) 62%)' }}
           />
           <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] items-center px-6 lg:px-12 xl:px-20">
             <HeroCopy onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
