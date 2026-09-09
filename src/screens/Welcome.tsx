@@ -225,7 +225,7 @@ export function Welcome() {
           <div className="relative mt-5 aspect-[21/10] w-full overflow-hidden">
             <img
               src={`${import.meta.env.BASE_URL}backdrops/hero-career-mobile.jpg`}
-              alt="Five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question."
+              alt="A small group of professionals at different career stages, working together at a shared desk."
               className="absolute inset-0 h-full w-full object-cover object-[65%_center]"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/40 via-transparent to-[var(--color-bg)]/50" />
@@ -328,7 +328,7 @@ export function Welcome() {
           <div className="relative min-w-0 flex-1 overflow-hidden">
             <img
               src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-              alt="Five professionals at different career stages — a fresher, a working professional, a career switcher, an upskiller, and a site engineer — each with a speech bubble naming their career question, set against a city skyline."
+              alt="A small group of professionals at different career stages, working together at a shared desk."
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div
