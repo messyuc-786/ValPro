@@ -110,24 +110,34 @@ function HeroCopy({ compact = false, onDiscover, onWhy }: { compact?: boolean; o
     <div className={compact ? '' : 'max-w-xl'}>
       <div
         className={`flex flex-col gap-0.5 font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] ${
-          compact ? 'text-[8.5px]' : 'text-[11px] tracking-[0.16em]'
+          compact ? 'text-[8.5px]' : 'text-[9px] tracking-[0.12em] lg:text-[11px] lg:tracking-[0.16em]'
         }`}
       >
         {EYEBROW_SIGNALS.map((s) => (
           <span key={s}>{s}</span>
         ))}
       </div>
-      <div className={`bg-[var(--color-accent-blue)] ${compact ? 'mt-2 h-px w-8' : 'mt-3 h-px w-10'}`} />
-      <h1 className={`font-display font-medium leading-[1.05] ${compact ? 'mt-3 text-[30px]' : 'mt-4 text-[44px] xl:text-[52px]'}`}>
+      <div className={`bg-[var(--color-accent-blue)] ${compact ? 'mt-2 h-px w-8' : 'mt-2 h-px w-8 lg:mt-3 lg:w-10'}`} />
+      {/* Sized down at md (768–1023px) specifically — the left column there
+          is ~34% of a narrower container, and the desktop 44px size wrapped
+          badly (found during QA against a real unmaximized browser window,
+          which lands in exactly this range). */}
+      <h1
+        className={`font-display font-medium leading-[1.05] ${compact ? 'mt-3 text-[30px]' : 'mt-3 text-[26px] lg:mt-4 lg:text-[38px] xl:text-[44px] 2xl:text-[52px]'}`}
+      >
         Know your <br />
         <em className="not-italic text-[var(--color-accent-blue)]">market value.</em>
       </h1>
-      <p className={`leading-relaxed text-[var(--color-muted)] ${compact ? 'mt-2.5 max-w-[26ch] text-[12.5px]' : 'mt-4 max-w-[34ch] text-[15px]'}`}>
+      <p
+        className={`leading-relaxed text-[var(--color-muted)] ${
+          compact ? 'mt-2.5 max-w-[26ch] text-[12.5px]' : 'mt-2.5 max-w-[28ch] text-[12.5px] lg:mt-4 lg:max-w-[34ch] lg:text-[15px]'
+        }`}
+      >
         Not just your salary. Real insights for a stronger next step.
       </p>
 
-      <div className={compact ? 'mt-4 max-w-[80%]' : 'mt-6 max-w-sm'}>
-        <Button onClick={onDiscover} className={compact ? 'w-full py-3 text-[13.5px]' : 'w-full py-3.5 text-[15px]'}>
+      <div className={compact ? 'mt-4 max-w-[80%]' : 'mt-4 max-w-[85%] lg:mt-6 lg:max-w-sm'}>
+        <Button onClick={onDiscover} className={compact ? 'w-full py-3 text-[13.5px]' : 'w-full py-2.5 text-[13px] lg:py-3.5 lg:text-[15px]'}>
           <span className="flex w-full items-center justify-between">
             Discover Your Market Value
             <IconArrowRight className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
@@ -139,7 +149,7 @@ function HeroCopy({ compact = false, onDiscover, onWhy }: { compact?: boolean; o
         type="button"
         onClick={onWhy}
         className={`inline-flex w-fit items-center gap-1.5 border-b border-[var(--color-accent)] font-semibold text-[var(--color-accent)] ${
-          compact ? 'mt-3 pb-0.5 text-[11.5px]' : 'mt-4 pb-0.5 text-[13px]'
+          compact ? 'mt-3 pb-0.5 text-[11.5px]' : 'mt-3 pb-0.5 text-[11.5px] lg:mt-4 lg:text-[13px]'
         }`}
       >
         Why ValPro Exists <IconArrowRight className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
@@ -154,13 +164,17 @@ export function Welcome() {
 
   return (
     <div className="theme-dark relative w-full bg-[var(--color-bg)] text-[var(--color-text)]">
-      {/* ============ MOBILE / TABLET-PORTRAIT (<lg) ============
+      {/* ============ MOBILE (<md) ============
           A genuinely stacked composition, not the desktop hero scaled down:
           nav → headline/copy/CTA on the app's own background (full contrast,
           no scrim needed) → a compact, rounded 3D scene card → feature strip.
           The card keeps the characters at a readable size instead of
-          shrinking the whole ensemble into a sliver behind text. */}
-      <div className="min-h-[100dvh] lg:hidden">
+          shrinking the whole ensemble into a sliver behind text.
+          Breakpoint is `md` (768px), not `lg` (1024px): a real but
+          unmaximized desktop browser window commonly sits in the
+          768–1023px range, and that reader should see the two-column
+          hero, not the phone layout. */}
+      <div className="min-h-[100dvh] md:hidden">
         <div className="flex flex-col px-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] pt-[calc(1.25rem_+_env(safe-area-inset-top))]">
           <div className="flex items-start justify-between gap-2">
             <div>
@@ -228,17 +242,17 @@ export function Welcome() {
         </div>
       </div>
 
-      {/* ============ TABLET-LANDSCAPE / DESKTOP (lg+) ============
+      {/* ============ TABLET-LANDSCAPE / DESKTOP (md+, 768px) ============
           Side-by-side split: left ~34% carries the real nav/copy/CTA on the
           app's own background (never overlaid on the photo, so contrast is
           never in question); right ~66% is the 3D scene, edge-blended into
           the page so it reads as part of the layout rather than a pasted
           rectangle. */}
-      <div className="hidden lg:block">
-        <div className="mx-auto flex h-[min(44vw,600px)] min-h-[480px] w-full max-w-[1600px] gap-10 px-12 py-8 xl:px-20">
+      <div className="hidden md:block">
+        <div className="mx-auto flex h-[min(46vw,600px)] min-h-[440px] w-full max-w-[1600px] gap-6 px-6 py-6 lg:gap-10 lg:px-12 lg:py-8 xl:px-20">
           <div className="flex w-[34%] shrink-0 flex-col justify-between">
-            {/* Below xl (1024–1279px), the column is too narrow for three nav
-                links + account + Sign Out on one line without wrapping —
+            {/* Below xl (up to 1279px), the column is too narrow for three
+                nav links + account + Sign Out on one line without wrapping —
                 collapse them into the existing hamburger menu there instead,
                 same links, just reached one tap away. Full inline nav returns
                 at xl+, where the column has room for it. */}
@@ -317,7 +331,7 @@ export function Welcome() {
         {/* Supporting information — the feature strip reads as the hero
             story's conclusion: understand where you stand, what drives your
             value, what to improve, and the decision that follows. */}
-        <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-12 py-8 xl:px-20">
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-6 lg:px-12 lg:py-8 xl:px-20">
           <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
             <ValuePointsRow />
             <SiteFooter />
