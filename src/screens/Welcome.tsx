@@ -179,28 +179,8 @@ export function Welcome() {
           unmaximized desktop browser window commonly sits in the
           768–1023px range, and that reader should see the two-column
           hero, not the phone layout. */}
-      <div className="relative flex min-h-[600px] w-full flex-col overflow-hidden md:hidden">
-        {/* Same source image as desktop (not a separately re-cropped,
-            over-zoomed asset) — object-position tuned so the frame holds
-            three characters, their speech bubbles and the ValPro laptop
-            together, at a scale consistent with the desktop composition
-            rather than a tight, blown-up crop of just one or two faces. */}
-        <img
-          src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
-          alt="Professionals at different career stages, each with a speech bubble, working together at a shared desk."
-          className="absolute inset-0 h-full w-full object-cover object-[32%_22%]"
-        />
-        {/* Top scrim (hides the artwork's own baked logo/nav row and keeps
-            the real header legible), bottom scrim (copy/CTA legibility). */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0.55) 14%, rgba(14,17,22,0.2) 30%, rgba(14,17,22,0.55) 62%, var(--color-bg) 92%)',
-          }}
-        />
-
-        <div className="relative z-10 flex flex-col px-5 pb-[calc(1.25rem_+_env(safe-area-inset-bottom))] pt-[calc(0.85rem_+_env(safe-area-inset-top))]">
+      <div className="relative flex w-full flex-col md:hidden">
+        <div className="flex flex-col px-5 pb-4 pt-[calc(0.85rem_+_env(safe-area-inset-top))]">
           <div className="flex items-start justify-between gap-2">
             <div>
               <Wordmark markClassName="h-5 w-5" />
@@ -240,10 +220,28 @@ export function Welcome() {
           )}
         </div>
 
-        {/* Copy sits lower over the scene, pinned toward the bottom of the
-            hero (above the fold) rather than centered through the middle
-            of the artwork, so the characters stay visible above it. */}
-        <div className="relative z-10 mt-auto px-5 pb-8">
+        {/* Full scene, nothing cropped out: the box's aspect ratio matches
+            the source image's own (2000:783) exactly, so all five
+            characters, their speech bubbles and the branded laptop are
+            all visible and in focus — not just whoever a portrait-shaped
+            crop happened to keep. Bleeds to the column's full width, no
+            card or border, fading into the page at the top and bottom. */}
+        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '2000 / 783' }}>
+          <img
+            src={`${import.meta.env.BASE_URL}backdrops/hero-career-desktop.jpg`}
+            alt="Five professionals at different career stages — fresher, working professional, career switcher, upskiller — each with a speech bubble, working together at a shared desk."
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(180deg, var(--color-bg) 0%, rgba(14,17,22,0) 16%, rgba(14,17,22,0) 78%, var(--color-bg) 100%), linear-gradient(90deg, var(--color-bg) 0%, rgba(14,17,22,0) 10%)',
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 px-5 pb-8 pt-5">
           <HeroCopy compact onDiscover={() => goTo('role')} onWhy={() => goTo('creators')} />
         </div>
       </div>
